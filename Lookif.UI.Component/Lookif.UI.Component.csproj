@@ -11,10 +11,14 @@ It contains:
 *Form
 *Dropdown - Selective
 *Grid
-</Description>
+----
+Blazored.Modal and Blazored.Toast are used in this project.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   
