@@ -1,0 +1,17 @@
+﻿@namespace Lookif.UI.Component.Crud.CrudComponent
+@using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+@using Lookif.UI.Component.Grids
+@typeparam TItem
+@typeparam TSelectItem
+
+
+<div class="row text-center" dir="rtl">
+
+    <h3 class="col-12 alert alert-info">درج یا ویرایش @FormName</h3>
+
+    <Form Dto="typeof(TItem)"  OnFinished="Bind"></Form>
+
+    <h3 class="col-12 alert alert-info">لیست @FormName</h3> 
+    
+    <GridView  TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" ></GridView>
+</div>

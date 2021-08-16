@@ -1,0 +1,11 @@
+﻿@using Microsoft.AspNetCore.Components 
+@inject NavigationManager _navigationManager
+@namespace  Lookif.UI.Component.Utility
+@code {
+    protected override void OnInitialized()
+    {
+        _navigationManager.NavigateTo("login");
+    }
+
+     
+}

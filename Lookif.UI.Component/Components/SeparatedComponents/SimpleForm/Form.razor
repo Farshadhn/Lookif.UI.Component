@@ -1,0 +1,41 @@
+﻿@namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+@using Lookif.UI.Component.Date.DateTimePickers
+ 
+@using Lookif.UI.Component.DropDown
+<div class="col-12 card ">
+
+    @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
+    {
+        <div class="row mb-2">
+            <div class="col-md-2" style="text-align: right;">
+                @item.DisplayName
+            </div>
+            <div class="col-md-8">
+                @if (item.Type is TypeOfInput.Text)
+                {
+                    <input @bind="item.Value" type="text" style="width: inherit;" />
+                }
+                else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
+                {
+                    <DropDownSelective SelectedOption="@item.Value" Records="@item.Collection" Key="Name" Value="Id" @bind-ReturnValue="item.Value"></DropDownSelective>
+                }
+                else if (item.Type is TypeOfInput.DateTime)
+                {
+                    <DateTimePickerDD ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></DateTimePickerDD>
+
+                }
+                else if (item.Type is TypeOfInput.CheckBox)
+                {
+                    <input type="checkbox" @bind="item.Valuebool" />
+
+                }
+            </div>
+        </div>
+    }
+
+
+    <div style="text-align: right;">
+        <button class="btn btn-Success col-1 mt-4 mb-4" @onclick="Add">ثبت</button>
+        <button class="btn btn-warning col-2  mt-4 mb-4" @onclick="Clear">پاک سازی</button>
+    </div>
+</div>

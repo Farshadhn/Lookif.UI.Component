@@ -1,0 +1,19 @@
+﻿.input-icons {
+    width: 100%;
+}
+
+.icon {
+    padding: 10px;
+    color: green;
+    min-width: 50px;
+    text-align: center;
+}
+
+.input-field {
+    width: 100%;
+    text-align: center;
+}
+
+h2 {
+    color: green;
+}

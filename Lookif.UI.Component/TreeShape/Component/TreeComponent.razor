@@ -1,0 +1,81 @@
+﻿@namespace Lookif.UI.Component.TreeShape.Component
+@using Lookif.UI.Component.TreeShape.Models;
+@using Lookif.UI.Common.Models;
+@using Lookif.Library.Common.Enums;
+@using Lookif.Library.Common.CommonModels;
+@using System.Net.Http;
+@using static Newtonsoft.Json.JsonConvert;
+
+@inject HttpClient Http
+
+<li>
+    @Item.TableName.displayName
+    @if (@Item.TreeNodes is not null && @Item.TreeNodes.Any())
+    {
+        <ul id="@Level">
+            @foreach (var child in Item.TreeNodes)
+            {
+
+                <bottun @onclick:stopPropagation="true" @onclick='() => SelectEntity(child.TableName.name,child)'>
+                    <TreeComponent Item="@child" Parent="Item" />
+                </bottun>
+            }
+        </ul>
+
+    }
+    @if (Item.Columns is not null && Item.Columns.Any())
+    {
+
+        <ul id="@Level">
+
+            @for (int i = 0; i < Item.Columns.Count; i++)
+            {
+                <li>
+                    @{int ex = i; }
+                    <input type="checkbox" @onclick:stopPropagation="true" @onchange="((e) =>  Item.Columns[ex]   = (Item.Columns[ex].name,Item.Columns[ex].displayName,(bool)e.Value)) " />
+                    @i -
+                    @Item.Columns[i].displayName
+                </li>
+            }
+
+
+
+        </ul>
+    }
+</li>
+@code {
+
+    private async Task SelectEntity(string entityName, TreeNode treeNode)
+    {
+        treeNode.Reset();
+        var res = await Http.GetAsync($"Reflection/GetAllPropertiesAndRelatedEntities/{entityName}"); //Because we have a enum to convert, we need to use GetAsync
+        var deserializedString = DeserializeObject<ApiResult<List<BriefPropertyInfo>>>(await res.Content.ReadAsStringAsync());
+        if (!deserializedString.IsSuccess)
+        {
+            Console.WriteLine($"Sorry we cannot get information about{entityName}");
+            return;
+        }
+        // treeNode.Parent = Item;
+        foreach (BriefPropertyInfo entry in deserializedString.Data)
+        {
+
+
+            if (entry.TypeOfProperty == TypeOfProperty.Class)
+                treeNode.AddNode(entry.PropertyTypeName, entry.PropertyDisplayName);
+            else
+                treeNode.AddColumn(entry.PropertyName, entry.PropertyDisplayName);
+
+
+        }
+    }
+
+
+    [CascadingParameter]
+    protected List<TreeNode> Selected { get; set; } = new List<TreeNode>();
+
+
+    [Parameter] public TreeNode Parent { get; set; }
+    [Parameter] public TreeNode Item { get; set; }
+    [Parameter] public int NocdeLevel { get; set; }
+    [Parameter] public int Level { get; set; }
+}

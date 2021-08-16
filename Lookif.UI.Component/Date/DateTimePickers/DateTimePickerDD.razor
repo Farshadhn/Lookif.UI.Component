@@ -1,0 +1,24 @@
+﻿@using System.Globalization;
+@using static System.Globalization.CultureInfo;
+@namespace Lookif.UI.Component.Date.DateTimePickers
+
+
+<select @bind="SelectedDay" >
+
+    @for (int i = 1; i <= CurrentCulture.Calendar.GetDaysInMonth(SelectedYear, SelectedMonth); i++)
+    {
+        <option value=@i>@i</option>
+    }
+</select>
+<select @bind="SelectedMonth" >
+    @foreach (var month in MonthNames)
+    {
+        <option value=@(month.RowNumber+1)>@month.Name</option>
+    }
+</select>
+<select @bind="SelectedYear"  >
+    @for (int i = 1398; i <= 1405; i++)
+    {
+        <option value=@i>@i</option>
+    }
+</select>

@@ -1,0 +1,67 @@
+﻿@namespace Lookif.UI.Component.DropDown
+@{
+    var id = Guid.NewGuid();
+
+}
+@if (SanitizedRecords == null)
+{
+    <p>
+        <em>در حال دریافت اطلاعات</em>
+    </p>
+}
+else
+{
+
+
+
+
+
+    <input list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
+
+    <datalist style="width: 100%;" id="@id">
+        @foreach (var record in SanitizedRecords)
+        {
+            <option style="width: 100%;">@record.Key</option>
+        }
+    </datalist>
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+
+    .input-icons {
+        width: 100%;
+    }
+
+
+
+    .icon {
+        padding: 10px;
+        color: green;
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .input-field {
+        width: 100%;
+        text-align: center;
+    }
+
+    h2 {
+        color: green;
+    }
+</style>
