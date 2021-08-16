@@ -13,6 +13,7 @@ It contains:
 *Grid
 </Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   
