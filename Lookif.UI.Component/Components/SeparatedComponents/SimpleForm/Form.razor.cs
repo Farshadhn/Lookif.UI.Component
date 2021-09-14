@@ -12,12 +12,11 @@ using Lookif.UI.Component.Models;
 using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using static Newtonsoft.Json.JsonConvert;
-
-
+using Microsoft.Extensions.Localization;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
-    public partial class Form  
+    public partial class Form 
 
     {
 
@@ -37,6 +36,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         protected override async Task OnInitializedAsync()
         {
+            //Console.WriteLine("OnInitializedAsync");
             await base.OnInitializedAsync();
             await Init();
             if (Key != default)
@@ -98,7 +98,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             }
 
-            //Console.WriteLine(SerializeObject(insertOrUpdate));
+            ////Console.WriteLine(SerializeObject(insertOrUpdate));
             var returnStr = String.Empty;
 
             if (Key == default)
@@ -152,7 +152,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Edit(string id)
         {
-            Console.WriteLine(id);
+            //Console.WriteLine("Edit");
+            //Console.WriteLine(id);
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
             var response = await dataObj.Content.ReadAsStringAsync(); 
 
@@ -190,6 +191,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task<List<RelatedTo>> FillDropDown(PropertyInfo propertyInfo, string tableNameToBeRetrieved)
         {
+            //Console.WriteLine("FillDropDown");
             var displayNameForDropDown = propertyInfo.GetCustomAttribute<RelatedToAttribute>()?.DisplayName;
 
             var listOfRelatedTo = await GetRelatedTo(tableNameToBeRetrieved, displayNameForDropDown);
@@ -206,6 +208,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private List<RelatedTo> FillEnum(PropertyInfo propertyInfo, string displayName)
         {
+
+            //Console.WriteLine("FillEnum");
             List<RelatedTo> listOfRelatedTo = new List<RelatedTo>();
 
             System.Type enumType = propertyInfo.PropertyType;
@@ -237,6 +241,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Init()
         {
+            //Console.WriteLine("Init");
             ItemsOfClasses = new List<ItemsOfClass>();
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
@@ -253,11 +258,18 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 var relatedTo = property.GetCustomAttribute<RelatedToAttribute>()?.Name;// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
-
+                ////Console.WriteLine("relatedTo");
                 if (!(relatedTo is null)) // We need to retrieved and fill dropdown
                 {
+                    //Console.WriteLine(relatedTo);
                     var list = await FillDropDown(property, relatedTo);
                     ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown });
+                    foreach (var item in ItemsOfClasses)
+                    {
+                        //Console.WriteLine(item.Name);
+                        //Console.WriteLine(item.DisplayName);
+                        //Console.WriteLine(item.Collection.Count);
+                    }
                 }
                 else if (property.PropertyType == typeof(String))
                     ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
@@ -287,8 +299,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             entityName = entityName.Replace("Dto", "");
             List<RelatedTo> relatedTos = new List<RelatedTo>();
-            var data = await Http.GetFromJsonAsync<ApiResult<List<RelatedTo>>>($"{entityName}/Get");
-
+            var res = await Http.GetAsync($"{entityName}/Get");
+            if (!res.IsSuccessStatusCode)
+                throw new Exception("");
+            var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync());
             foreach (var item in data.Data)
             {
 
@@ -306,7 +320,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         #region ... Parameter...
 
-
+        [Parameter]
+        public IStringLocalizer Resource { get; set; }
         [Parameter] public EventCallback<string> OnFinished { get; set; }
         [Parameter] public Type Dto { get; set; }
         [Parameter] public string Key { get; set; }
@@ -374,6 +389,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
     {
         //ToDo Make it Generic so we dont need to add anymore items
         public string Name { get; set; }
+        public string Value { get; set; }
         public string Code { get; set; }
         public string FullName { get; set; }
         public string UserName { get; set; }

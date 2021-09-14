@@ -33,7 +33,7 @@ namespace Lookif.UI.Component.DropDown
                 SanitizedRecords.Add(DropDownKey, DropDownValue);
             }
 
-            //Console.WriteLine($"SanitizedRecords=>{SerializeObject(SanitizedRecords)}");
+            ////Console.WriteLine($"SanitizedRecords=>{SerializeObject(SanitizedRecords)}");
         }
 
 
@@ -48,13 +48,13 @@ namespace Lookif.UI.Component.DropDown
         {
 
             Bind();
-            //Console.WriteLine("OnParametersSetAsync1");
+            ////Console.WriteLine("OnParametersSetAsync1");
             if (SelectedOption is null)
                 return;
 
 
-            //Console.WriteLine("OnParametersSetAsync2");
-            //Console.WriteLine(SerializeObject(SelectedOption));
+            ////Console.WriteLine("OnParametersSetAsync2");
+            ////Console.WriteLine(SerializeObject(SelectedOption));
 
             SetIdFromName(SelectedOption);
             await base.OnParametersSetAsync();
@@ -71,16 +71,16 @@ namespace Lookif.UI.Component.DropDown
 
         private string SetIdFromName(string key)
         {
-            //Console.WriteLine("SetIdFromName");
+            ////Console.WriteLine("SetIdFromName");
             var res = new KeyValuePair<string, string>();
             if (Guid.TryParse(key, out _))
                 res = SanitizedRecords.FirstOrDefault(x => x.Value.Trim() == key.Trim());
             else
                 res = SanitizedRecords.FirstOrDefault(x => x.Key.Trim() == key.Trim());
-            //Console.WriteLine(SerializeObject(res));
+            ////Console.WriteLine(SerializeObject(res));
             if (res.Value is not null)
             {
-                //Console.WriteLine("Areeeeeeeeeeeeeeeeee");
+                ////Console.WriteLine("Areeeeeeeeeeeeeeeeee");
                 Selected = res.Key;
                 return res.Value;
             }

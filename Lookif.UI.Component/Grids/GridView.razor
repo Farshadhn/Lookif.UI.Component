@@ -3,7 +3,7 @@
 @using System.Reflection
 @using Lookif.UI.Component.Attributes
 @using Microsoft.AspNetCore.Components.Forms
-
+@using Microsoft.Extensions.Localization;
 @using Blazored.Modal
 @using Blazored.Modal.Services
 @using Lookif.UI.Component.Components.SeparatedComponents
@@ -11,7 +11,10 @@
 @using static Newtonsoft.Json.JsonConvert;
 @typeparam TSelectItem
 @typeparam TItem
+@{
+    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
+}
 
 
 
@@ -28,11 +31,39 @@
                             continue;
 
                         <th style=" text-align-last: center;">
-                            <span style="vertical-align: middle;font-size:larger;font-weight:500">@item.Displayname</span>
+                                            <span style="vertical-align: middle;font-size:larger;font-weight:500">
+                                                @{
+                                                    if (relatedSource is null) // When there is no source file
+                                                    {
+                                                        if (@item.Displayname is null) // when there is no displayName
+                                                        {
+                                                            @item.PropertyName
+                                                        }
+                                                        else
+                                                        {
+                                                            @item.Displayname
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
+                                                        if (value == "")
+                                                        {
+                                                            @item.PropertyName
+                                                        }
+                                                        else
+                                                        {
+                                                            @value
+                                                        }
+
+                                                    }
+                                                }
+
+                                            </span>
                             @*<div>
-                                <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
-                                <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
-                            </div>*@
+                                    <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
+                                    <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
+                                </div>*@
                             <div>
                                 <input type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
                             </div>
@@ -61,7 +92,7 @@
                         var Id = string.Empty;
                         @foreach (var item in record)
                         {
-                             
+
                             if (item.ObjectName == "Id")
                             {
                                 Id = item.ObjectValue;
@@ -75,7 +106,7 @@
                             }
                         }
                         <td>
-                             
+
 
                             @if (EditBtn)
                             {
@@ -130,7 +161,7 @@
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e.Message);
+                            //Console.WriteLine(e.Message);
                         }
 
                     }

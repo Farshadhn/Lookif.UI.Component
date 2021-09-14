@@ -1,14 +1,45 @@
 ﻿@namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 @using Lookif.UI.Component.Date.DateTimePickers
- 
+@using Microsoft.Extensions.Localization;
 @using Lookif.UI.Component.DropDown
-<div class="col-12 card ">
 
+
+@{
+    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+
+}
+<div class="col-12 card ">
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
         <div class="row mb-2">
             <div class="col-md-2" style="text-align: right;">
-                @item.DisplayName
+                @{
+                    if (relatedSource is null) // When there is no source file
+                    {
+                        if (@item.DisplayName is null ) // when there is no displayName
+                        {
+                            @item.Name
+                        }
+                        else
+                        {
+                            @item.DisplayName
+                        }
+                    }
+                    else
+                    { 
+                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.Name)?.Value;
+                        if (value == "")
+                        {
+                            @item.Name
+                        }
+                        else
+                        {
+                            @value
+                        }
+
+                    }
+                }
+
             </div>
             <div class="col-md-8">
                 @if (item.Type is TypeOfInput.Text)

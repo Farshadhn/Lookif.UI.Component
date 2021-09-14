@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using static Newtonsoft.Json.JsonConvert;
+using Microsoft.Extensions.Localization;
+
 namespace Lookif.UI.Component.Crud.CrudComponent
 {
     public partial class CrudComponent<TItem, TSelectItem>
@@ -21,9 +23,10 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");
         [Parameter]
         public string FormName { get; set; }
-
+        [Parameter]
+        public IStringLocalizer Resource { get; set; }
         protected override async Task OnInitializedAsync()
-        {
+        { 
             await base.OnInitializedAsync();
             await Bind();
 

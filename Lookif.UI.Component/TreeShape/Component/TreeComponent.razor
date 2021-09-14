@@ -52,7 +52,7 @@
         var deserializedString = DeserializeObject<ApiResult<List<BriefPropertyInfo>>>(await res.Content.ReadAsStringAsync());
         if (!deserializedString.IsSuccess)
         {
-            Console.WriteLine($"Sorry we cannot get information about{entityName}");
+            //Console.WriteLine($"Sorry we cannot get information about{entityName}");
             return;
         }
         // treeNode.Parent = Item;

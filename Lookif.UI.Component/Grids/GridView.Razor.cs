@@ -13,6 +13,7 @@ using Lookif.UI.Component.Components.SeparatedComponents;
 using Lookif.UI.Component.Models;
 using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
+using Microsoft.Extensions.Localization;
 
 namespace Lookif.UI.Component.Grids
 {
@@ -80,18 +81,18 @@ namespace Lookif.UI.Component.Grids
                             //    var enumValue = prop.GetValue(input, null).ToString();
                             //    var a =  Convert.ChangeType(prop.GetValue(input, null), item.TypeOfObject)!;
                             //    var s = Enum.Parse(item.TypeOfObject, enumValue, false);
-                            //    //Console.WriteLine(SerializeObject(s.GetAttribute<DisplayAttribute>()));
-                            //    //Console.WriteLine(SerializeObject(a));
-                            //    //Console.WriteLine(SerializeObject(item.Key));
-                            //    //Console.WriteLine(SerializeObject(item.PropertyName));
-                            //    //Console.WriteLine(SerializeObject(item.TypeOfObject));
-                            //    //Console.WriteLine(SerializeObject(prop.GetValue(input, null).ToString())); 
-                            //    //Console.WriteLine(SerializeObject(item.Value)); 
-                            //    //Console.WriteLine(SerializeObject(item.Displayname));  
-                            //    //Console.WriteLine(item.Key.GetAttribute<DisplayAttribute>());
-                            //    //Console.WriteLine(item.PropertyName.GetAttribute<DisplayAttribute>());
-                            //    //Console.WriteLine(item.TypeOfObject.GetAttribute<DisplayAttribute>());
-                            //    //Console.WriteLine(item.Value.GetAttribute<DisplayAttribute>());
+                            //    ////Console.WriteLine(SerializeObject(s.GetAttribute<DisplayAttribute>()));
+                            //    ////Console.WriteLine(SerializeObject(a));
+                            //    ////Console.WriteLine(SerializeObject(item.Key));
+                            //    ////Console.WriteLine(SerializeObject(item.PropertyName));
+                            //    ////Console.WriteLine(SerializeObject(item.TypeOfObject));
+                            //    ////Console.WriteLine(SerializeObject(prop.GetValue(input, null).ToString())); 
+                            //    ////Console.WriteLine(SerializeObject(item.Value)); 
+                            //    ////Console.WriteLine(SerializeObject(item.Displayname));  
+                            //    ////Console.WriteLine(item.Key.GetAttribute<DisplayAttribute>());
+                            //    ////Console.WriteLine(item.PropertyName.GetAttribute<DisplayAttribute>());
+                            //    ////Console.WriteLine(item.TypeOfObject.GetAttribute<DisplayAttribute>());
+                            //    ////Console.WriteLine(item.Value.GetAttribute<DisplayAttribute>());
 
 
 
@@ -107,7 +108,7 @@ namespace Lookif.UI.Component.Grids
                         catch (Exception e)
                         {
 
-                            //Console.WriteLine(e.Message);
+                            ////Console.WriteLine(e.Message);
                         }
 
                     }
@@ -115,7 +116,7 @@ namespace Lookif.UI.Component.Grids
                 }
                 return ConvertedRecords;
             }
-            //Console.WriteLine($"Records is null");
+            ////Console.WriteLine($"Records is null");
             return null;
         }
 
@@ -179,7 +180,7 @@ namespace Lookif.UI.Component.Grids
 
 
         #region ...Parameter...
-
+        [Parameter] public IStringLocalizer Resource { get; set; }
         [Parameter] public List<TSelectItem> Records { get; set; }
         [Parameter] public List<List<ValuePlaceHolder>> ConvertedRecords { get; set; }
 
@@ -203,7 +204,7 @@ namespace Lookif.UI.Component.Grids
         #region  ...Events...
         private async Task Delete(string Id)
         {
-            //Console.WriteLine(Id);
+            ////Console.WriteLine(Id);
             await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
         }

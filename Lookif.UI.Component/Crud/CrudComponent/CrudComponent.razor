@@ -9,9 +9,9 @@
 
     <h3 class="col-12 alert alert-info">درج یا ویرایش @FormName</h3>
 
-    <Form Dto="typeof(TItem)"  OnFinished="Bind"></Form>
+    <Form Dto="typeof(TItem)"  OnFinished="Bind" Resource="Resource"></Form>
 
     <h3 class="col-12 alert alert-info">لیست @FormName</h3> 
     
-    <GridView  TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" ></GridView>
+    <GridView  TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource"></GridView>
 </div>

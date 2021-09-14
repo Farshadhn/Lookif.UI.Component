@@ -12,6 +12,7 @@ using Blazored.Modal.Services;
 using Lookif.UI.Component.Attributes;
 using Lookif.UI.Component.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using static Newtonsoft.Json.JsonConvert;
 
 
@@ -66,7 +67,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents
 
         #region ... Parameter...
 
-
+        [Parameter]
+        public IStringLocalizer Resource { get; set; }
         [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
         [Parameter] public EventCallback<string> OnFinished { get; set; }
         [Parameter] public string Key { get; set; }
