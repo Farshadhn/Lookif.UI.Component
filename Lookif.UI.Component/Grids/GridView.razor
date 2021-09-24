@@ -8,6 +8,8 @@
 @using Blazored.Modal.Services
 @using Lookif.UI.Component.Components.SeparatedComponents
 
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
 @using static Newtonsoft.Json.JsonConvert;
 @typeparam TSelectItem
 @typeparam TItem
@@ -31,35 +33,35 @@
                             continue;
 
                         <th style=" text-align-last: center;">
-                                            <span style="vertical-align: middle;font-size:larger;font-weight:500">
-                                                @{
-                                                    if (relatedSource is null) // When there is no source file
-                                                    {
-                                                        if (@item.Displayname is null) // when there is no displayName
-                                                        {
-                                                            @item.PropertyName
-                                                        }
-                                                        else
-                                                        {
-                                                            @item.Displayname
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
-                                                        if (value == "")
-                                                        {
-                                                            @item.PropertyName
-                                                        }
-                                                        else
-                                                        {
-                                                            @value
-                                                        }
+                            <span style="vertical-align: middle;font-size:larger;font-weight:500">
+                                @{
+                                    if (relatedSource is null) // When there is no source file
+                                    {
+                                        if (@item.Displayname is null) // when there is no displayName
+                                        {
+                                            @item.PropertyName
+                                        }
+                                        else
+                                        {
+                                            @item.Displayname
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
+                                        if (value == "")
+                                        {
+                                            @item.PropertyName
+                                        }
+                                        else
+                                        {
+                                            @value
+                                        }
 
-                                                    }
-                                                }
+                                    }
+                                }
 
-                                            </span>
+                            </span>
                             @*<div>
                                     <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
                                     <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
@@ -78,7 +80,7 @@
         {
             <tr>
                 <td colspan="@PropertyInformations.Count()">
-                    <p>داده ای برای نمایش موجود نیست</p>
+                    <p>@basicResource["NoRecord"]</p> 
                 </td>
             </tr>
         }
@@ -111,12 +113,12 @@
                             @if (EditBtn)
                             {
 
-                                <button class="btn btn-warning btn-block" @onclick="() => Edit(Id)">ویرایش</button>
+                                <button class="btn btn-warning btn-block" @onclick="() => Edit(Id)">@basicResource["Edit"]</button>
 
                             }
                             @if (DeleteBtn)
                             {
-                                <button class="btn btn-danger  btn-block" @onclick='() => Delete(Id)'>حذف</button>
+                                <button class="btn btn-danger  btn-block" @onclick='() => Delete(Id)'>@basicResource["Delete"]</button>
 
                             }
 
@@ -132,7 +134,8 @@
         <div class="col-3">
 
             <p>
-                تعداد کل:
+                @basicResource["Total"]:
+                
                 @FilteredRecords!.Count
 
             </p>

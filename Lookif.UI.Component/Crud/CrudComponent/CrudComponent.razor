@@ -4,14 +4,17 @@
 @typeparam TItem
 @typeparam TSelectItem
 
+@using Microsoft.Extensions.Localization;
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
 
 <div class="row text-center" dir="rtl">
 
-    <h3 class="col-12 alert alert-info">درج یا ویرایش @FormName</h3>
+    <h3 class="col-12 alert alert-info">@basicResource["FormTitle"] @FormName</h3>
 
-    <Form Dto="typeof(TItem)"  OnFinished="Bind" Resource="Resource"></Form>
+    <Form Dto="typeof(TItem)" OnFinished="Bind" Resource="Resource"></Form>
 
-    <h3 class="col-12 alert alert-info">لیست @FormName</h3> 
-    
-    <GridView  TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource"></GridView>
+    <h3 class="col-12 alert alert-info">@basicResource["GridTitle"]  @FormName</h3>
+
+    <GridView TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource"></GridView>
 </div>

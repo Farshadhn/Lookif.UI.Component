@@ -16,9 +16,9 @@ Blazored.Modal and Blazored.Toast are used in this project.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
-    <AssemblyVersion>1.0.10.0</AssemblyVersion>
-    <FileVersion>1.0.10.0</FileVersion>
-    <Version>1.0.10</Version>
+    <AssemblyVersion>1.0.12.0</AssemblyVersion>
+    <FileVersion>1.0.12.0</FileVersion>
+    <Version>1.0.12</Version>
   </PropertyGroup>
 
   
@@ -39,17 +39,17 @@ Blazored.Modal and Blazored.Toast are used in this project.</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="BasicResource.Designer.cs">
+    <Compile Update="Resources\Resource.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>BasicResource.resx</DependentUpon>
+      <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="BasicResource.resx">
+    <EmbeddedResource Update="Resources\Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>BasicResource.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

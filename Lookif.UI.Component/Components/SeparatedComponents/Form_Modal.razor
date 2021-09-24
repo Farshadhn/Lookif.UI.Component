@@ -1,9 +1,13 @@
-﻿@namespace Lookif.UI.Component.Components.SeparatedComponents 
+﻿@namespace Lookif.UI.Component.Components.SeparatedComponents
 @using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+
+@using Microsoft.Extensions.Localization;
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
 <div style="width: 70vw;direction: rtl;">
 
-    <Form  Dto="@MyTItem" Key="@MyKey" OnFinished="MyOnFinished" Resource="Resource"></Form>
+    <Form Dto="@MyTItem" Key="@MyKey" OnFinished="MyOnFinished" Resource="Resource"></Form>
 
 
-    <button @onclick="Close" class="btn btn-primary">خروج</button> 
+    <button @onclick="Close" class="btn btn-primary">@basicResource["Close"]</button>
 </div>

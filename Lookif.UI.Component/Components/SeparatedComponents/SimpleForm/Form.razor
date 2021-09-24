@@ -2,8 +2,9 @@
 @using Lookif.UI.Component.Date.DateTimePickers
 @using Microsoft.Extensions.Localization;
 @using Lookif.UI.Component.DropDown
+@using Lookif.UI.Component.Resources
 
-
+@inject IStringLocalizer<Resource> basicResource
 @{
     var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
@@ -66,7 +67,7 @@
 
 
     <div style="text-align: right;">
-        <button class="btn btn-Success col-1 mt-4 mb-4" @onclick="Add">ثبت</button>
-        <button class="btn btn-warning col-2  mt-4 mb-4" @onclick="Clear">پاک سازی</button>
+        <button class="btn btn-Success col-1 mt-4 mb-4" @onclick="Add">@basicResource["Add"]</button>
+        <button class="btn btn-warning col-2  mt-4 mb-4" @onclick="Clear">@basicResource["Clear"]</button>
     </div>
 </div>

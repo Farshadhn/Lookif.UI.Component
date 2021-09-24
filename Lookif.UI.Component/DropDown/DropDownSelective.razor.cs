@@ -60,8 +60,6 @@ namespace Lookif.UI.Component.DropDown
         }
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
         {
-            Console.WriteLine("myrecordsChange");
-            Console.WriteLine(SerializeObject(changeEventArgs.Value));
             // var SelectedValue = (T)Convert.ChangeType(changeEventArgs.Value, typeof(T));
             var SelectedValue = changeEventArgs.Value.ToString();
 
@@ -69,9 +67,7 @@ namespace Lookif.UI.Component.DropDown
             if (IsItChanged)
             {
                 Selected = obj.key;
-                Console.WriteLine(obj.value.ToString());
-                Console.WriteLine(obj.key.ToString());
-                var finalRes =  (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
+                var finalRes = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
                 await ReturnValueChanged.InvokeAsync(finalRes);
             }
         }
@@ -79,22 +75,14 @@ namespace Lookif.UI.Component.DropDown
 
         private ((string key, string value), bool IsItChanged) SetIdFromName(string key)
         {
-            ////Console.WriteLine("SetIdFromName");
             var res = new KeyValuePair<string, string>();
             if (key is not string)
                 res = SanitizedRecords.FirstOrDefault(x => x.Value.Trim() == key.Trim());
             else
                 res = SanitizedRecords.FirstOrDefault(x => x.Key.Trim() == key.Trim());
-            ////Console.WriteLine(SerializeObject(res));
-            if (res.Value is not null)
-            {
-                ////Console.WriteLine("Areeeeeeeeeeeeeeeeee");
-                
-                Console.WriteLine("res.Key=>"+ res.Key);
-                Console.WriteLine("res.Value=>"+ res.Value);
-                return ((res.Key, res.Value), true);
-            }
-            return (default, false);
+
+            return ((res.Value is not null) ? ((res.Key, res.Value), true) : (default, false));
+
         }
         #endregion
 
