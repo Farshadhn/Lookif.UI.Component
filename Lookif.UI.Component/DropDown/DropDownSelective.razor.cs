@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-
+using static Newtonsoft.Json.JsonConvert;
 
 
 namespace Lookif.UI.Component.DropDown
 {
-    public partial class DropDownSelective
+    public partial class DropDownSelective<T>
     {
-        private string returnValue;
+        private T returnValue;
 
 
 
@@ -48,32 +49,39 @@ namespace Lookif.UI.Component.DropDown
         {
 
             Bind();
-            ////Console.WriteLine("OnParametersSetAsync1");
+
             if (SelectedOption is null)
                 return;
 
 
-            ////Console.WriteLine("OnParametersSetAsync2");
-            ////Console.WriteLine(SerializeObject(SelectedOption));
-
-            SetIdFromName(SelectedOption);
+            //SetIdFromName(SelectedOption);
             await base.OnParametersSetAsync();
 
         }
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
         {
+            Console.WriteLine("myrecordsChange");
+            Console.WriteLine(SerializeObject(changeEventArgs.Value));
+            // var SelectedValue = (T)Convert.ChangeType(changeEventArgs.Value, typeof(T));
             var SelectedValue = changeEventArgs.Value.ToString();
-            var str = SetIdFromName(SelectedValue);
-            if (str != "")
-                await ReturnValueChanged.InvokeAsync(str);
+
+            var (obj, IsItChanged) = SetIdFromName(SelectedValue);
+            if (IsItChanged)
+            {
+                Selected = obj.key;
+                Console.WriteLine(obj.value.ToString());
+                Console.WriteLine(obj.key.ToString());
+                var finalRes =  (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
+                await ReturnValueChanged.InvokeAsync(finalRes);
+            }
         }
 
 
-        private string SetIdFromName(string key)
+        private ((string key, string value), bool IsItChanged) SetIdFromName(string key)
         {
             ////Console.WriteLine("SetIdFromName");
             var res = new KeyValuePair<string, string>();
-            if (Guid.TryParse(key, out _))
+            if (key is not string)
                 res = SanitizedRecords.FirstOrDefault(x => x.Value.Trim() == key.Trim());
             else
                 res = SanitizedRecords.FirstOrDefault(x => x.Key.Trim() == key.Trim());
@@ -81,10 +89,12 @@ namespace Lookif.UI.Component.DropDown
             if (res.Value is not null)
             {
                 ////Console.WriteLine("Areeeeeeeeeeeeeeeeee");
-                Selected = res.Key;
-                return res.Value;
+                
+                Console.WriteLine("res.Key=>"+ res.Key);
+                Console.WriteLine("res.Value=>"+ res.Value);
+                return ((res.Key, res.Value), true);
             }
-            return "";
+            return (default, false);
         }
         #endregion
 
@@ -109,20 +119,21 @@ namespace Lookif.UI.Component.DropDown
         [Parameter] public string Value { get; set; }
 
         [Parameter]
-        public string SelectedOption { get; set; }
+        public T SelectedOption { get; set; }
 
 
         [Parameter]
-        public string ReturnValue
+        public T ReturnValue
         {
             get => returnValue; set
             {
-                if (value != returnValue)
+                Console.WriteLine("value" + SerializeObject(value));
+                if (!value.Equals(returnValue))
                     returnValue = value;
             }
         }
         [Parameter]
-        public EventCallback<string> ReturnValueChanged { get; set; }
+        public EventCallback<T> ReturnValueChanged { get; set; }
 
         #endregion
     }

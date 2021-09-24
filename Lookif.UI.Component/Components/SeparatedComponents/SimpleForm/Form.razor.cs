@@ -395,6 +395,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public string UserName { get; set; }
         public string FollowUpCode { get; set; }
         public string HardwareSerial { get; set; }
+        public string UnitVolume { get; set; }
+        public string BatchNumber { get; set; }
+        public string Stage  { get; set; }
+        public string UnitPerPack { get; set; }
 
 
 

@@ -1,4 +1,5 @@
-﻿@namespace Lookif.UI.Component.DropDown
+﻿@typeparam T
+@namespace Lookif.UI.Component.DropDown
 @{
     var id = Guid.NewGuid();
 
@@ -21,7 +22,7 @@ else
     <datalist style="width: 100%;" id="@id">
         @foreach (var record in SanitizedRecords)
         {
-            <option style="width: 100%;">@record.Key</option>
+            <option style="width: 100%;" >@record.Key</option>
         }
     </datalist>
 
