@@ -6,7 +6,7 @@
 
 @inject IStringLocalizer<Resource> basicResource
 @{
-    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+    relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
 }
 <div class="col-12 card ">
@@ -45,7 +45,7 @@
             <div class="col-md-8">
                 @if (item.Type is TypeOfInput.Text)
                 {
-                    <input @bind="item.Value" type="text" style="width: inherit;" />
+                    <input  class="form-control" @bind="item.Value" type="text" style="width: inherit;" />
                 }
                 else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
                 {
@@ -58,7 +58,7 @@
                 }
                 else if (item.Type is TypeOfInput.CheckBox)
                 {
-                    <input type="checkbox" @bind="item.Valuebool" />
+                    <input  class="form-control" type="checkbox" @onchange='(x=>item.Value = ((bool)x.Value).ToString())'   />
 
                 }
             </div>
@@ -67,7 +67,7 @@
 
 
     <div style="text-align: right;">
-        <button class="btn btn-Success col-1 mt-4 mb-4" @onclick="Add">@basicResource["Add"]</button>
+        <button class="btn btn-success col-1 mt-4 mb-4" @onclick="Add">@basicResource["Add"]</button>
         <button class="btn btn-warning col-2  mt-4 mb-4" @onclick="Clear">@basicResource["Clear"]</button>
     </div>
 </div>

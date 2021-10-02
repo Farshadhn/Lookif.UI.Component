@@ -13,10 +13,20 @@ using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using static Newtonsoft.Json.JsonConvert;
 using Microsoft.Extensions.Localization;
+using System.Globalization;
+using System.ComponentModel;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
-    public partial class Form 
+    public static class TypeExtensions
+    {
+        public static bool IsNullableType(this Type type)
+        {
+            return type.IsGenericType
+                   && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
+        }
+    }
+    public partial class Form
 
     {
 
@@ -36,7 +46,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         protected override async Task OnInitializedAsync()
         {
-            //Console.WriteLine("OnInitializedAsync");
             await base.OnInitializedAsync();
             await Init();
             if (Key != default)
@@ -58,47 +67,35 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (null == prop || !prop.CanWrite) continue;
 
 
-                var relatedTo = prop.GetCustomAttribute<RelatedToAttribute>();//Name that should be placed as its label
+               
+                if (String.IsNullOrEmpty(item?.Value)) continue;
+                 
+                var targetType = prop.PropertyType.IsNullableType()
+                                           ? Nullable.GetUnderlyingType(prop.PropertyType)
+                                           : prop.PropertyType; 
+                try
+                {
+                    var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
+                    prop.SetValue(insertOrUpdate, convertedValue, null);
+                }
+                catch (Exception ex)
+                {  
+                    var rs = relatedSource.Find(x => x.Name == prop.Name);
+                    toastService.ShowError($"لطفا در  '{rs}'، مقدار صحیح را وارد نمایید", "خطا");
+                    return;
+                }
+               
+                
 
-                if (!(relatedTo is null))
-                {
-                    Guid id = default;
-                    var rawValue = item?.Value; 
-                    if (String.IsNullOrEmpty(rawValue))
-                        continue;
 
-                    id = Guid.Parse(rawValue!);
-                    prop.SetValue(insertOrUpdate, id!, null);
 
-                }
-                else if (prop.PropertyType.FullName == typeof(DateTime).FullName)
-                {
-                    var raw = item?.DateTime;
-                    prop.SetValue(insertOrUpdate, raw, null);
-                }
-                else if (prop.PropertyType.FullName == typeof(Boolean).FullName)
-                {
-                    var raw = item?.Valuebool;
-                    prop.SetValue(insertOrUpdate, raw, null);
-                }
-                else if (prop.PropertyType.FullName == typeof(int).FullName)
-                {
-                    var raw = item?.Value;
-                    prop.SetValue(insertOrUpdate, Convert.ToInt32(raw), null);
-                }
-                else if (prop.PropertyType.IsEnum)
-                {
-                    var raw = item?.Value;
-                    prop.SetValue(insertOrUpdate, Enum.Parse(prop.PropertyType, raw ?? string.Empty), null);
-                }
-                else
-                {
-                    prop.SetValue(insertOrUpdate, item?.Value.ToString(), null);
-                }
+               
+
+                
+
 
             }
-
-            ////Console.WriteLine(SerializeObject(insertOrUpdate));
+             
             var returnStr = String.Empty;
 
             if (Key == default)
@@ -109,9 +106,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (!res.IsSuccess)
                 {
                     toastService.ShowError(res.Message, "خطا");
-                    return ;
+                    return;
                 }
-                 
+
                 var efIdProp = res.Data.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
                 returnStr = efIdProp?.GetValue(res.Data)?.ToString();
             }
@@ -121,11 +118,11 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var responseMessage = await Http.PutAsJsonAsync($"{ModelName}/update/{Key}", insertOrUpdate);
 
             }
-
+            await Clear();
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess("با موفقیت انجام شد", "موفقیت");
-            await Clear();
+           
         }
 
         #endregion
@@ -134,7 +131,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         #region ... Definition...
 
-
+        List<LocalizedString> relatedSource { get; set; }
         private string ModelName => Dto.Name.Replace("Dto", "");
 
         public IList<ItemsOfClass> ItemsOfClasses { get; set; } = new List<ItemsOfClass>();
@@ -152,14 +149,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Edit(string id)
         {
-            //Console.WriteLine("Edit");
-            //Console.WriteLine(id);
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
-            var response = await dataObj.Content.ReadAsStringAsync(); 
+            var response = await dataObj.Content.ReadAsStringAsync();
 
             var generic = typeof(ApiResult<>);
-            Type constructed = generic.MakeGenericType(Dto); 
-            var res = DeserializeObject(response!, constructed); 
+            Type constructed = generic.MakeGenericType(Dto);
+            var res = DeserializeObject(response!, constructed);
             PropertyInfo prosp = res.GetType().GetProperty("Data", BindingFlags.Public | BindingFlags.Instance);
 
             var data = prosp.GetValue(res, null)!;
@@ -191,11 +186,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task<List<RelatedTo>> FillDropDown(PropertyInfo propertyInfo, string tableNameToBeRetrieved)
         {
-            //Console.WriteLine("FillDropDown");
             var displayNameForDropDown = propertyInfo.GetCustomAttribute<RelatedToAttribute>()?.DisplayName;
 
             var listOfRelatedTo = await GetRelatedTo(tableNameToBeRetrieved, displayNameForDropDown);
-             
+
             return listOfRelatedTo;
 
         }
@@ -209,8 +203,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private List<RelatedTo> FillEnum(PropertyInfo propertyInfo, string displayName)
         {
 
-            //Console.WriteLine("FillEnum");
-            List<RelatedTo> listOfRelatedTo = new List<RelatedTo>();
+            List<RelatedTo> listOfRelatedTo = new();
 
             System.Type enumType = propertyInfo.PropertyType;
             System.Type enumUnderlyingType = System.Enum.GetUnderlyingType(enumType);
@@ -241,7 +234,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Init()
         {
-            //Console.WriteLine("Init");
             ItemsOfClasses = new List<ItemsOfClass>();
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
@@ -258,32 +250,29 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 var relatedTo = property.GetCustomAttribute<RelatedToAttribute>()?.Name;// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
-                ////Console.WriteLine("relatedTo");
-                if (!(relatedTo is null)) // We need to retrieved and fill dropdown
+
+                if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
-                    //Console.WriteLine(relatedTo);
                     var list = await FillDropDown(property, relatedTo);
                     ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown });
-                    foreach (var item in ItemsOfClasses)
-                    {
-                        //Console.WriteLine(item.Name);
-                        //Console.WriteLine(item.DisplayName);
-                        //Console.WriteLine(item.Collection.Count);
-                    }
-                }
-                else if (property.PropertyType == typeof(String))
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
-                else if (property.PropertyType == typeof(DateTime))
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
-                else if (property.PropertyType == typeof(Boolean))
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.CheckBox });
-                else if (property.PropertyType.IsEnum)
-                {
-                    var list = FillEnum(property, displayName);
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list });
+
                 }
                 else
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+                {
+                    if (property.PropertyType == typeof(String))
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+                    else if (property.PropertyType == typeof(DateTime))
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
+                    else if (property.PropertyType == typeof(Boolean))
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox });
+                    else if (property.PropertyType.IsEnum)
+                    {
+                        var list = FillEnum(property, displayName);
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list });
+                    }
+                    else
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+                }
 
             }
         }
@@ -397,7 +386,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public string HardwareSerial { get; set; }
         public string UnitVolume { get; set; }
         public string BatchNumber { get; set; }
-        public string Stage  { get; set; }
+        public string Stage { get; set; }
         public string UnitPerPack { get; set; }
 
 

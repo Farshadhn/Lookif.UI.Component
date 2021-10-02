@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Blazored.Toast.Services;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,7 @@ namespace Lookif.UI.Component.DropDown
     {
         private T returnValue;
 
-
+        [Inject] IToastService toastService { get; set; }
 
         #region ...Function...
 
@@ -33,8 +34,6 @@ namespace Lookif.UI.Component.DropDown
 
                 SanitizedRecords.Add(DropDownKey, DropDownValue);
             }
-
-            ////Console.WriteLine($"SanitizedRecords=>{SerializeObject(SanitizedRecords)}");
         }
 
 
@@ -64,12 +63,22 @@ namespace Lookif.UI.Component.DropDown
             var SelectedValue = changeEventArgs.Value.ToString();
 
             var (obj, IsItChanged) = SetIdFromName(SelectedValue);
+            if (string.IsNullOrEmpty(obj.key) && string.IsNullOrEmpty(obj.value))
+            {
+
+                changeEventArgs.Value = " ";
+                Selected = " ";
+                toastService.ShowError("لطفا مقدار صحیح را از داخل لیست انتخاب فرمایید.!", "خطا");
+                return;
+
+            }
             if (IsItChanged)
             {
                 Selected = obj.key;
                 var finalRes = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
                 await ReturnValueChanged.InvokeAsync(finalRes);
             }
+
         }
 
 
@@ -115,7 +124,6 @@ namespace Lookif.UI.Component.DropDown
         {
             get => returnValue; set
             {
-                Console.WriteLine("value" + SerializeObject(value));
                 if (!value.Equals(returnValue))
                     returnValue = value;
             }

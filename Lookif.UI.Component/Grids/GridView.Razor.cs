@@ -76,27 +76,6 @@ namespace Lookif.UI.Component.Grids
                                 bool a = (bool)Convert.ChangeType(prop.GetValue(input, null), typeof(bool))!;
                                 vph.ObjectValue = a ? "بله" : "خیر";
                             }
-                            //else if (item.TypeOfObject.IsEnum)
-                            //{
-                            //    var enumValue = prop.GetValue(input, null).ToString();
-                            //    var a =  Convert.ChangeType(prop.GetValue(input, null), item.TypeOfObject)!;
-                            //    var s = Enum.Parse(item.TypeOfObject, enumValue, false);
-                            //    ////Console.WriteLine(SerializeObject(s.GetAttribute<DisplayAttribute>()));
-                            //    ////Console.WriteLine(SerializeObject(a));
-                            //    ////Console.WriteLine(SerializeObject(item.Key));
-                            //    ////Console.WriteLine(SerializeObject(item.PropertyName));
-                            //    ////Console.WriteLine(SerializeObject(item.TypeOfObject));
-                            //    ////Console.WriteLine(SerializeObject(prop.GetValue(input, null).ToString())); 
-                            //    ////Console.WriteLine(SerializeObject(item.Value)); 
-                            //    ////Console.WriteLine(SerializeObject(item.Displayname));  
-                            //    ////Console.WriteLine(item.Key.GetAttribute<DisplayAttribute>());
-                            //    ////Console.WriteLine(item.PropertyName.GetAttribute<DisplayAttribute>());
-                            //    ////Console.WriteLine(item.TypeOfObject.GetAttribute<DisplayAttribute>());
-                            //    ////Console.WriteLine(item.Value.GetAttribute<DisplayAttribute>());
-
-
-
-                            //}
                             else
                             {
 
@@ -108,7 +87,7 @@ namespace Lookif.UI.Component.Grids
                         catch (Exception e)
                         {
 
-                            ////Console.WriteLine(e.Message);
+                            
                         }
 
                     }
@@ -116,7 +95,6 @@ namespace Lookif.UI.Component.Grids
                 }
                 return ConvertedRecords;
             }
-            ////Console.WriteLine($"Records is null");
             return null;
         }
 
@@ -204,7 +182,6 @@ namespace Lookif.UI.Component.Grids
         #region  ...Events...
         private async Task Delete(string Id)
         {
-            ////Console.WriteLine(Id);
             await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
         }

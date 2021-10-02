@@ -21,8 +21,7 @@ namespace Lookif.UI.Component.TreeShape.Models
             if (TreeNodes is null || TreeNodes == default)
                 TreeNodes = new List<TreeNode>();
             TreeNodes.Add(new TreeNode() { TableName = new(input, displayName) });
-            //Console.WriteLine(input);
-            //Console.WriteLine(displayName);
+          
         }
 
         

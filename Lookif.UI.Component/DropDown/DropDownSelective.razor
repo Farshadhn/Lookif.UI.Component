@@ -12,17 +12,14 @@
 }
 else
 {
+     
 
-
-
-
-
-    <input list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
+    <input class="custom-select custom-select-sm" list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
 
     <datalist style="width: 100%;" id="@id">
         @foreach (var record in SanitizedRecords)
         {
-            <option style="width: 100%;" >@record.Key</option>
+            <option style="width: 100%;">@record.Key</option>
         }
     </datalist>
 
