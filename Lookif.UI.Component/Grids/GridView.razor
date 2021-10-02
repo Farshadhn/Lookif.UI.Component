@@ -7,7 +7,7 @@
 @using Blazored.Modal
 @using Blazored.Modal.Services
 @using Lookif.UI.Component.Components.SeparatedComponents
-
+@using System.Globalization
 @using Lookif.UI.Component.Resources
 @inject IStringLocalizer<Resource> basicResource
 @using static Newtonsoft.Json.JsonConvert;
@@ -19,7 +19,26 @@
 }
 
 
+@if (!CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
+{
 
+
+    <style>
+        * {
+            text-align: left;
+            direction: ltr;
+        }
+    </style>
+}
+else
+{
+    <style>
+        * {
+            text-align: right;
+            direction: rtl;
+        }
+    </style>
+}
 
 <div class="col-12 card">
 
@@ -80,7 +99,7 @@
         {
             <tr>
                 <td colspan="@PropertyInformations.Count()">
-                    <p>@basicResource["NoRecord"]</p> 
+                    <p>@basicResource["NoRecord"]</p>
                 </td>
             </tr>
         }
@@ -135,7 +154,7 @@
 
             <p>
                 @basicResource["Total"]:
-                
+
                 @FilteredRecords!.Count
 
             </p>
@@ -164,7 +183,7 @@
                         }
                         catch (Exception e)
                         {
-                           
+
                         }
 
                     }

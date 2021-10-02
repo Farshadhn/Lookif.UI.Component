@@ -27,9 +27,9 @@ namespace Lookif.UI.Component.Date.DateTimePickers
 
 
 
-        private int selectedYear = CurrentUICulture.Calendar.GetYear(Now);
-        private int selectedMonth = CurrentUICulture.Calendar.GetMonth(Now);
-        private int selectedDay = CurrentUICulture.Calendar.GetDayOfMonth(Now);
+        private int selectedYear = CurrentCulture.Calendar.GetYear(Now);
+        private int selectedMonth = CurrentCulture.Calendar.GetMonth(Now);
+        private int selectedDay = CurrentCulture.Calendar.GetDayOfMonth(Now);
 
         private int SelectedDay
         {
@@ -74,9 +74,9 @@ namespace Lookif.UI.Component.Date.DateTimePickers
                 
                 var Input = new DateTime(Value.Year, Value.Month, Value.Day);
 
-                var d = CurrentUICulture.Calendar.GetDayOfMonth(Input);
-                var m = CurrentUICulture.Calendar.GetMonth(Input);
-                var y = CurrentUICulture.Calendar.GetYear(Input);
+                var d = CurrentCulture.Calendar.GetDayOfMonth(Input);
+                var m = CurrentCulture.Calendar.GetMonth(Input);
+                var y = CurrentCulture.Calendar.GetYear(Input);
 
                 if (SelectedDay != d)
                     SelectedDay = d;
@@ -98,8 +98,7 @@ namespace Lookif.UI.Component.Date.DateTimePickers
 
 
         protected override Task OnInitializedAsync()
-        {
-            
+        { 
             ValueChanged.InvokeAsync(Latest);
             return base.OnInitializedAsync();
         }
@@ -109,7 +108,7 @@ namespace Lookif.UI.Component.Date.DateTimePickers
             
             if (Value == default)
             {
-                 
+               
                 SelectedYear = CurrentUICulture.Calendar.GetYear(Now);
                 SelectedMonth = CurrentUICulture.Calendar.GetMonth(Now);
                 SelectedDay = CurrentUICulture.Calendar.GetDayOfMonth(Now);

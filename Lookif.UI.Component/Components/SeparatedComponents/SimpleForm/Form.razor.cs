@@ -65,37 +65,48 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             {
                 var prop = insertOrUpdate.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
                 if (null == prop || !prop.CanWrite) continue;
-
-
                
-                if (String.IsNullOrEmpty(item?.Value)) continue;
-                 
+                
+                
+                
                 var targetType = prop.PropertyType.IsNullableType()
-                                           ? Nullable.GetUnderlyingType(prop.PropertyType)
-                                           : prop.PropertyType; 
+                                  ? Nullable.GetUnderlyingType(prop.PropertyType)
+                                  : prop.PropertyType;
+                if (targetType == typeof(DateTime))
+                {
+                    prop.SetValue(insertOrUpdate, item.DateTime, null);
+                    continue;
+                }// ToDo Make it like the others
+
+
+                if (String.IsNullOrEmpty(item?.Value)) continue;
+
+
+
+
                 try
                 {
                     var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
                     prop.SetValue(insertOrUpdate, convertedValue, null);
                 }
                 catch (Exception ex)
-                {  
+                {
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
                     toastService.ShowError($"لطفا در  '{rs}'، مقدار صحیح را وارد نمایید", "خطا");
                     return;
                 }
-               
-                
 
 
 
-               
 
-                
+
+
+
+
 
 
             }
-             
+
             var returnStr = String.Empty;
 
             if (Key == default)
@@ -122,7 +133,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess("با موفقیت انجام شد", "موفقیت");
-           
+
         }
 
         #endregion
@@ -347,7 +358,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } 
         public bool Valuebool { get; set; }
 
         public int Order { get; set; }
