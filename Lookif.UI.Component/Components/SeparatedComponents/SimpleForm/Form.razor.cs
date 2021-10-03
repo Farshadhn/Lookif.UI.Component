@@ -259,7 +259,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 // Convert the value to its underlying type (int, byte, long, ...)
                 object underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
 
-                listOfRelatedTo.Insert(0, new RelatedTo() { Id = underlyingValue.ToString(), Name = propValue.ToString() });
+                listOfRelatedTo.Insert(0, new RelatedTo() { Id = underlyingValue.ToString(), Name = dropdownName });
             }
 
             return listOfRelatedTo;
