@@ -44,18 +44,24 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         #region ...Events...
 
 
+        protected async override Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+                await Init();
+        }
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            await Init();
+
             if (Key != default)
                 await Edit(Key);
+
         }
 
 
         /// <summary>
         /// Add Or Create New
-        /// </summary>
+        /// </summary>  
         /// <returns></returns>
         private async Task Add()
         {
@@ -65,10 +71,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             {
                 var prop = insertOrUpdate.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
                 if (null == prop || !prop.CanWrite) continue;
-               
-                
-                
-                
+
+
+
+
                 var targetType = prop.PropertyType.IsNullableType()
                                   ? Nullable.GetUnderlyingType(prop.PropertyType)
                                   : prop.PropertyType;
@@ -107,8 +113,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             }
 
-            var returnStr = String.Empty;
-
+            var returnStr = String.Empty; 
             if (Key == default)
             {
 
@@ -205,6 +210,31 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         }
 
+
+        /// <summary>
+        /// First priority is resource file
+        /// Second is display name
+        /// Last one is property name
+        /// </summary>
+        /// <returns></returns>
+        private string GetDesirableValue(object property)
+        {
+            var rs = relatedSource.FirstOrDefault(x => x.Name == property.ToString());
+
+            if (rs is not null)
+                return rs.Value;
+
+
+
+            var attribute = (DisplayAttribute)property.GetType().GetField(property.ToString())
+                   .GetCustomAttributes<DisplayAttribute>(false).FirstOrDefault();
+            if (attribute is not null)
+                return attribute.Name;
+            return property.ToString();
+
+        }
+
+
         /// <summary>
         /// Get Display name of each enum properties
         /// </summary>
@@ -215,26 +245,22 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
 
             List<RelatedTo> listOfRelatedTo = new();
-
-            System.Type enumType = propertyInfo.PropertyType;
-            System.Type enumUnderlyingType = System.Enum.GetUnderlyingType(enumType);
-            System.Array enumValues = System.Enum.GetValues(enumType);
+            Type enumType = propertyInfo.PropertyType;
+            Type enumUnderlyingType = System.Enum.GetUnderlyingType(enumType);
+            Array enumValues = System.Enum.GetValues(enumType);
 
             for (int i = 0; i < enumValues.Length; i++)
             {
 
                 // Retrieve the value of the ith enum item.
                 object value = enumValues.GetValue(i);
-                var attribute = value.GetType().GetField(value.ToString())
-                    .GetCustomAttributes<DisplayAttribute>(false).FirstOrDefault();
 
-                var propValue = attribute?.GetType().GetProperty("Name")?.GetValue(attribute, null);
+                var dropdownName = GetDesirableValue(value);
                 // Convert the value to its underlying type (int, byte, long, ...)
                 object underlyingValue = System.Convert.ChangeType(value, enumUnderlyingType);
 
-                listOfRelatedTo.Insert(0, new RelatedTo() { Id = underlyingValue.ToString(), Name = propValue.ToString() });
-            }
-
+                listOfRelatedTo.Insert(0, new RelatedTo() { Id = underlyingValue.ToString(), Name = dropdownName });
+            } 
             return listOfRelatedTo;
         }
 
@@ -358,7 +384,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
-        public DateTime DateTime { get; set; } 
+        public DateTime DateTime { get; set; }
         public bool Valuebool { get; set; }
 
         public int Order { get; set; }
