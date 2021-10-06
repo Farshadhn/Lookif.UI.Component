@@ -48,16 +48,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
+            {
                 await Init();
-        }
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
+                if (Key != default)
+                    await Edit(Key);
 
-            if (Key != default)
-                await Edit(Key);
-
+                
+                StateHasChanged();
+            }
         }
+       
 
 
         /// <summary>
@@ -328,18 +328,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             var entityName = relatedTo.Name.Replace("Dto", "");
             List<RelatedTo> relatedTos = new();
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
-            
 
+            Console.WriteLine(sendToAddress);
             var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
             var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync(cancellationToken));
+            Console.WriteLine(SerializeObject(data));
             foreach (var item in data.Data)
             {
-
+                Console.WriteLine(relatedTo.DisplayName);
                 var idProp = item.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
-                var displayProp = item.GetType().GetProperty(relatedTo.Name, BindingFlags.Public | BindingFlags.Instance);
-
+                var displayProp = item.GetType().GetProperty(relatedTo.DisplayName, BindingFlags.Public | BindingFlags.Instance);
+                Console.WriteLine(displayProp);
                 var a = new RelatedTo() { Name = displayProp?.GetValue(item, null)?.ToString(), Id = idProp?.GetValue(item, null)?.ToString() };
 
                 relatedTos.Add(a);
@@ -430,6 +431,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public string BatchNumber { get; set; }
         public string Stage { get; set; }
         public string UnitPerPack { get; set; }
+        public string dayOfWeek { get; set; }
 
 
 

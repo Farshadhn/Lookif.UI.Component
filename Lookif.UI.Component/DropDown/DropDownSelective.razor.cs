@@ -21,13 +21,16 @@ namespace Lookif.UI.Component.DropDown
         private void Bind()
         {
             SanitizedRecords = new Dictionary<string, string>();
-
+            if (!Records.Any())
+                return; 
             foreach (var Record in Records)
             {
-
+                 
                 var property = Record.GetType().GetProperty(Key);
-                var DropDownKey = property.GetValue(Record, null).ToString();
-
+                var targetObject = property.GetValue(Record, null);
+                if (targetObject is null)
+                    continue;
+                var DropDownKey = targetObject.ToString();
 
                 property = Record.GetType().GetProperty(Value);
                 var DropDownValue = property.GetValue(Record, null).ToString();
@@ -58,8 +61,7 @@ namespace Lookif.UI.Component.DropDown
 
         }
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
-        {
-            // var SelectedValue = (T)Convert.ChangeType(changeEventArgs.Value, typeof(T));
+        { 
             var SelectedValue = changeEventArgs.Value.ToString();
 
             var (obj, IsItChanged) = SetIdFromName(SelectedValue);
