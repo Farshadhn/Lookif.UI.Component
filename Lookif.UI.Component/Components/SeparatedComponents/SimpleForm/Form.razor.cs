@@ -15,6 +15,7 @@ using static Newtonsoft.Json.JsonConvert;
 using Microsoft.Extensions.Localization;
 using System.Globalization;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
@@ -113,7 +114,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             }
 
-            var returnStr = String.Empty; 
+            var returnStr = String.Empty;
             if (Key == default)
             {
 
@@ -200,11 +201,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <param name="propertyInfo"></param>
         /// <param name="tableNameToBeRetrieved"></param>
         /// <returns></returns>
-        private async Task<List<RelatedTo>> FillDropDown(PropertyInfo propertyInfo, string tableNameToBeRetrieved)
+        private async Task<List<RelatedTo>> FillDropDown(RelatedToAttribute relatedTo, CancellationToken cancellationToken)
         {
-            var displayNameForDropDown = propertyInfo.GetCustomAttribute<RelatedToAttribute>()?.DisplayName;
 
-            var listOfRelatedTo = await GetRelatedTo(tableNameToBeRetrieved, displayNameForDropDown);
+            var listOfRelatedTo = await GetRelatedTo(relatedTo, cancellationToken);
 
             return listOfRelatedTo;
 
@@ -272,6 +272,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Init()
         {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
@@ -286,12 +287,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 var displayName = property.GetCustomAttribute<DisplayAttribute>()?.Name;//Name that should be placed as its label
 
-                var relatedTo = property.GetCustomAttribute<RelatedToAttribute>()?.Name;// To check if we need to implement this field as a Dropdown or not
+                var relatedTo = property.GetCustomAttribute<RelatedToAttribute>();// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
-                    var list = await FillDropDown(property, relatedTo);
+                    var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
                     ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown });
 
                 }
@@ -322,19 +323,22 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
 
-        private async Task<List<RelatedTo>> GetRelatedTo(string entityName, string displayName)
+        private async Task<List<RelatedTo>> GetRelatedTo(RelatedToAttribute relatedTo, CancellationToken cancellationToken)
         {
-            entityName = entityName.Replace("Dto", "");
-            List<RelatedTo> relatedTos = new List<RelatedTo>();
-            var res = await Http.GetAsync($"{entityName}/Get");
+            var entityName = relatedTo.Name.Replace("Dto", "");
+            List<RelatedTo> relatedTos = new();
+            var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
+            
+
+            var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
-            var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync());
+            var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync(cancellationToken));
             foreach (var item in data.Data)
             {
 
                 var idProp = item.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
-                var displayProp = item.GetType().GetProperty(displayName, BindingFlags.Public | BindingFlags.Instance);
+                var displayProp = item.GetType().GetProperty(relatedTo.Name, BindingFlags.Public | BindingFlags.Instance);
 
                 var a = new RelatedTo() { Name = displayProp?.GetValue(item, null)?.ToString(), Id = idProp?.GetValue(item, null)?.ToString() };
 
