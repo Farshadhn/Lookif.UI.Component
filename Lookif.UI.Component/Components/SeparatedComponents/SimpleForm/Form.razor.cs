@@ -99,7 +99,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 catch (Exception ex)
                 {
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
-                    toastService.ShowError($"لطفا در  '{rs}'، مقدار صحیح را وارد نمایید", "خطا");
+                    var error = basicResource["InputError"].Value;
+                    toastService.ShowError($"{error}:  -'{rs}'-", basicResource["InputErrorHeader"].Value); 
                     return;
                 }
 
@@ -115,6 +116,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             }
 
             var returnStr = String.Empty;
+            var notificationText = String.Empty;
+            var notificationHeaderText = String.Empty;
             if (Key == default)
             {
 
@@ -122,23 +125,27 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var res = DeserializeObject<ApiResult<object>>(await responseMessage.Content.ReadAsStringAsync());
                 if (!res.IsSuccess)
                 {
-                    toastService.ShowError(res.Message, "خطا");
+                    toastService.ShowError(res.Message, basicResource["InputErrorHeader"].Value);
                     return;
                 }
 
                 var efIdProp = res.Data.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
                 returnStr = efIdProp?.GetValue(res.Data)?.ToString();
+                notificationText = basicResource["DoneAdding"].Value;
+                notificationHeaderText = basicResource["DoneAddingHeader"].Value;
             }
             else
             {
 
                 var responseMessage = await Http.PutAsJsonAsync($"{ModelName}/update/{Key}", insertOrUpdate);
+                notificationText = basicResource["DoneEditing"].Value;
+                notificationHeaderText = basicResource["DoneEditingHeader"].Value;
 
             }
             await Clear();
 
-            await OnFinished.InvokeAsync(returnStr);
-            toastService.ShowSuccess("با موفقیت انجام شد", "موفقیت");
+            await OnFinished.InvokeAsync(returnStr); 
+            toastService.ShowSuccess(notificationText, notificationHeaderText);
 
         }
 

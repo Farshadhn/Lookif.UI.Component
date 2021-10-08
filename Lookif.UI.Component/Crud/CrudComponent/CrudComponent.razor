@@ -7,7 +7,10 @@
 @using Microsoft.Extensions.Localization;
 @using Lookif.UI.Component.Resources
 @inject IStringLocalizer<Resource> basicResource
+@{
+   var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
+}
 <div class="row text-center" dir="rtl">
 
     <h3 class="col-12 alert alert-info">@basicResource["FormTitle"] @FormName</h3>
@@ -16,5 +19,5 @@
 
     <h3 class="col-12 alert alert-info">@basicResource["GridTitle"]  @FormName</h3>
 
-    <GridView TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource"></GridView>
+    <GridView TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource" OnDeleteFinished="OnDeleteFinished"></GridView>
 </div>

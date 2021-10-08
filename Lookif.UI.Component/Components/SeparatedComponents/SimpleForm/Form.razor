@@ -14,27 +14,39 @@
 {
 
 
-<style>
+    <style>
         * {
-            text-align : left;
-            direction:ltr;
+            text-align: left;
+            direction: ltr;
         }
 
+        .FormFields {
+            float: left;
+        }
+
+       
     </style>
 }
-else { 
-<style>
-    * {
-        text-align: right;
-        direction: rtl;
-    }
-</style>
+else
+{
+    <style>
+        * {
+            text-align: right;
+            direction: rtl;
+        }
+
+        .FormFields {
+            float: right
+        }
+    </style>
 }
-<div class="col-12 card ">
+<div class="col-12  ">
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
-        <div class="row mb-2">
-            <div class="col-md-2"  >
+        <div class="col-12 col-md-6 FormFields"> 
+
+            <div class="col-12">
+            <label style=" font-size: larger; font-weight: bolder;">
                 @{
                     if (relatedSource is null) // When there is no source file
                     {
@@ -62,33 +74,32 @@ else {
                     }
                 }
 
-            </div>
-            <div class="col-md-8"> 
-                @if (item.Type is TypeOfInput.Text)
-                {
-                    <input class="form-control" @bind="item.Value" type="text" style="width: inherit;" />
-                }
-                else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
-                {
-                    <DropDownSelective SelectedOption="@item.Value" Records="@item.Collection" Key="Name" Value="Id" @bind-ReturnValue="item.Value"></DropDownSelective>
-                }
-                else if (item.Type is TypeOfInput.DateTime)
-                {
-                    <DateTimePickerDD ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></DateTimePickerDD>
+            </label>
+            @if (item.Type is TypeOfInput.Text)
+            {
+                <input class="form-control" @bind="item.Value" type="text" style="width: inherit;" />
+            }
+            else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
+            {
+                <DropDownSelective SelectedOption="@item.Value" Records="@item.Collection" Key="Name" Value="Id" @bind-ReturnValue="item.Value"></DropDownSelective>
+            }
+            else if (item.Type is TypeOfInput.DateTime)
+            {
+                <DateTimePickerDD ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></DateTimePickerDD>
 
-                }
-                else if (item.Type is TypeOfInput.CheckBox)
-                {
-                    <input class="form-control" type="checkbox" @onchange='(x=>item.Value = ((bool)x.Value).ToString())' />
+            }
+            else if (item.Type is TypeOfInput.CheckBox)
+            {
+                <input class="form-control" type="checkbox" @onchange='(x=>item.Value = ((bool)x.Value).ToString())' />
 
-                }
-            </div>
+            }
         </div>
-    }
-
-
-    <div  >
-        <button class="btn btn-success col-1 mt-4 mb-4" @onclick="Add">@basicResource["Add"]</button>
-        <button class="btn btn-warning col-2  mt-4 mb-4" @onclick="Clear">@basicResource["Clear"]</button>
     </div>
-</div>
+}
+
+
+    <div>
+        <button class="btn btn-success col-md-3  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
+        <button class="btn btn-warning col-md-3  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" @onclick="Clear">@basicResource["Clear"]</button>
+    </div>
+    </div>

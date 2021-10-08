@@ -129,6 +129,24 @@
   <data name="Delete" xml:space="preserve">
     <value>حذف</value>
   </data>
+  <data name="DoneAdding" xml:space="preserve">
+    <value>افزودن با موقیت انجام شد</value>
+  </data>
+  <data name="DoneAddingHeader" xml:space="preserve">
+    <value>افزودن</value>
+  </data>
+  <data name="DoneDeleted" xml:space="preserve">
+    <value>با موفقیت حذف شد</value>
+  </data>
+  <data name="DoneDeletedHeader" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="DoneEditing" xml:space="preserve">
+    <value>ویرایش با موفقیت انجام شد</value>
+  </data>
+  <data name="DoneEditingHeader" xml:space="preserve">
+    <value>ویرایش </value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>ویرایش</value>
   </data>
@@ -137,6 +155,12 @@
   </data>
   <data name="GridTitle" xml:space="preserve">
     <value>لیست</value>
+  </data>
+  <data name="InputError" xml:space="preserve">
+    <value>لطفا مقدار صحیح را وارد نمایید</value>
+  </data>
+  <data name="InputErrorHeader" xml:space="preserve">
+    <value>خطا</value>
   </data>
   <data name="Insert" xml:space="preserve">
     <value>وارد کردن</value>

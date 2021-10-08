@@ -129,6 +129,24 @@
   <data name="Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="DoneAdding" xml:space="preserve">
+    <value>Successfully Added</value>
+  </data>
+  <data name="DoneAddingHeader" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="DoneDeleted" xml:space="preserve">
+    <value>Successfully deleted</value>
+  </data>
+  <data name="DoneDeletedHeader" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DoneEditing" xml:space="preserve">
+    <value>Successfully Modified</value>
+  </data>
+  <data name="DoneEditingHeader" xml:space="preserve">
+    <value>Edit</value>
+  </data>
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
@@ -137,6 +155,12 @@
   </data>
   <data name="GridTitle" xml:space="preserve">
     <value>List of </value>
+  </data>
+  <data name="InputError" xml:space="preserve">
+    <value>Please Insert correct Value</value>
+  </data>
+  <data name="InputErrorHeader" xml:space="preserve">
+    <value>Error</value>
   </data>
   <data name="Insert" xml:space="preserve">
     <value>Insert</value>

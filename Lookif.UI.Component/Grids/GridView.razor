@@ -19,6 +19,7 @@
 }
 
 
+
 @if (!CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
 {
 
@@ -40,7 +41,7 @@ else
     </style>
 }
 
-<div class="col-12 card">
+<div class="col-12 card" style="overflow-x: scroll;">
 
     <table class="table table-hover">
         <thead>
@@ -51,8 +52,8 @@ else
                         if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
                             continue;
 
-                        <th style=" text-align-last: center;">
-                            <span style="vertical-align: middle;font-size:larger;font-weight:500">
+                        <th style=" text-align-last: center; min-width: 15vw;">
+                            <span style="vertical-align: middle;font-size:larger;">
                                 @{
                                     if (relatedSource is null) // When there is no source file
                                     {

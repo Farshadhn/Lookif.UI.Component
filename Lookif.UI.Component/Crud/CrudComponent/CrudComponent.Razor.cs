@@ -20,6 +20,8 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         [Inject] HttpClient Http { get; set; }
         public List<TSelectItem> Records = new List<TSelectItem>();
 
+         
+
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");
         [Parameter]
         public string FormName { get; set; }
@@ -42,10 +44,14 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         }
 
 
+        private async Task OnDeleteFinished(string Id)
+        { 
+            await Bind();
+        }
 
 
 
-      
+
     }
 
 

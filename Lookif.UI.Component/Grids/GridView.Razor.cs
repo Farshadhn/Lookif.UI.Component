@@ -14,23 +14,34 @@ using Lookif.UI.Component.Models;
 using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using Microsoft.Extensions.Localization;
+using Blazored.Toast.Services;
 
 namespace Lookif.UI.Component.Grids
 {
     public partial class GridView<TSelectItem, TItem> where TItem : class
     {
+
+
         private int _count = 5;
         [Inject] HttpClient Http { get; set; }
+        [Inject] IToastService toastService { get; set; }
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");
+
+
+        List<LocalizedString> relatedSource = new List<LocalizedString>();
+
+
+
         private async Task<List<List<ValuePlaceHolder>>> Bind()
-        { 
+        {
             var dataObj = await Http.GetFromJsonAsync<ApiResult<List<TSelectItem>>>($"{ModelName}/Get");
-            Records = dataObj.Data; 
+            Records = dataObj.Data;
             return ConvertInputToListOfValuePlaceHolders(dataObj.Data);
 
         }
         public GridView()
         {
+
 
             FindAllProperties();
 
@@ -44,7 +55,7 @@ namespace Lookif.UI.Component.Grids
         /// <returns></returns>
         public List<List<ValuePlaceHolder>> ConvertInputToListOfValuePlaceHolders(List<TSelectItem> records = null)
         {
-                   
+
 
             if (Records is not null)
             {
@@ -52,13 +63,12 @@ namespace Lookif.UI.Component.Grids
                     records = Records;
                 ConvertedRecords = new List<List<ValuePlaceHolder>>();
                 foreach (var input in records)
-                { 
+                {
                     var temp = new List<ValuePlaceHolder>();
                     foreach (var item in PropertyInformations)
                     {
                         try
                         {
-
                             var vph = new ValuePlaceHolder();
                             var prop = input.GetType().GetProperty(item.PropertyName);
                             vph.ObjectName = item.PropertyName;
@@ -79,7 +89,7 @@ namespace Lookif.UI.Component.Grids
                             else
                             {
 
-                                vph.ObjectValue = prop.GetValue(input, null).ToString();
+                                vph.ObjectValue = prop.GetValue(input, null)?.ToString();
 
                             }
                             temp.Add(vph);
@@ -87,7 +97,7 @@ namespace Lookif.UI.Component.Grids
                         catch (Exception e)
                         {
 
-                            
+
                         }
 
                     }
@@ -134,7 +144,7 @@ namespace Lookif.UI.Component.Grids
 
 
 
-      
+
 
 
         #region ...Definition...
@@ -169,6 +179,7 @@ namespace Lookif.UI.Component.Grids
 
 
         [Parameter] public EventCallback<string> OnFinished { get; set; }
+        [Parameter] public EventCallback<string> OnDeleteFinished { get; set; }
 
         [CascadingParameter] public IModalService Modal { get; set; }
 
@@ -184,12 +195,16 @@ namespace Lookif.UI.Component.Grids
         {
             await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
+            toastService.ShowSuccess(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
+            await OnDeleteFinished.InvokeAsync(Id);
+
+
         }
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             await base.SetParametersAsync(parameters);
-             
-            ConvertedRecords = ConvertInputToListOfValuePlaceHolders(); 
+
+            ConvertedRecords = ConvertInputToListOfValuePlaceHolders();
             if (ConvertedRecords is null)
                 return;
             FilteredRecords = ConvertedRecords;
@@ -226,7 +241,8 @@ namespace Lookif.UI.Component.Grids
             parameters.Add("Key", id);
             parameters.Add("TItem", typeof(TItem));
             parameters.Add("OnFinished", OnFinished);
-            var MessageForm = Modal.Show<Form_Modal>("ویرایش", parameters);
+            parameters.Add("Resource", Resource);
+            var MessageForm = Modal.Show<Form_Modal>(basicResource["Edit"], parameters);
             var result = await MessageForm.Result;
 
             await OnFinished.InvokeAsync(id)!;
@@ -236,7 +252,7 @@ namespace Lookif.UI.Component.Grids
 
         void Sort(string propertyName, SortOrder order)
         {
-            var property = typeof(TSelectItem).GetProperty(propertyName); 
+            var property = typeof(TSelectItem).GetProperty(propertyName);
             switch (order)
             {
                 case SortOrder.Asc when !(property is null):
@@ -283,18 +299,18 @@ namespace Lookif.UI.Component.Grids
             }
             else
             {
-                FilteredRecords = containsAll;              
+                FilteredRecords = containsAll;
 
-            }                                                           
+            }
             PagedRecords = FilteredRecords.Take(Count).ToList();
 
         }
-                                            
-                        
+
+
         void ChangePage(int page)
         {
             CurrentPage = page;
-            page = page - 1;
+            page--;
 
             PagedRecords = (page * Count < FilteredRecords.Count()) ? FilteredRecords.Skip(page * Count).Take(Count).ToList() : FilteredRecords.Skip((page - 1) * Count).Take(Count).ToList();
 

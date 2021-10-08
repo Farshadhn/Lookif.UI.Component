@@ -97,6 +97,60 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Successfully Added.
+        /// </summary>
+        internal static string DoneAdding {
+            get {
+                return ResourceManager.GetString("DoneAdding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        internal static string DoneAddingHeader {
+            get {
+                return ResourceManager.GetString("DoneAddingHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully deleted.
+        /// </summary>
+        internal static string DoneDeleted {
+            get {
+                return ResourceManager.GetString("DoneDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string DoneDeletedHeader {
+            get {
+                return ResourceManager.GetString("DoneDeletedHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successfully Modified.
+        /// </summary>
+        internal static string DoneEditing {
+            get {
+                return ResourceManager.GetString("DoneEditing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        internal static string DoneEditingHeader {
+            get {
+                return ResourceManager.GetString("DoneEditingHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit.
         /// </summary>
         internal static string Edit {
@@ -120,6 +174,24 @@ namespace Lookif.UI.Component.Resources {
         internal static string GridTitle {
             get {
                 return ResourceManager.GetString("GridTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please Insert correct Value.
+        /// </summary>
+        internal static string InputError {
+            get {
+                return ResourceManager.GetString("InputError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string InputErrorHeader {
+            get {
+                return ResourceManager.GetString("InputErrorHeader", resourceCulture);
             }
         }
         
