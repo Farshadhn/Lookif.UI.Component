@@ -126,7 +126,7 @@ namespace Lookif.UI.Component.DropDown
         {
             get => returnValue; set
             {
-                if (!value.Equals(returnValue))
+                if (value is not null && !value.Equals(returnValue))
                     returnValue = value;
             }
         }
