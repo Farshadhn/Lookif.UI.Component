@@ -22,10 +22,10 @@ namespace Lookif.UI.Component.DropDown
         {
             SanitizedRecords = new Dictionary<string, string>();
             if (!Records.Any())
-                return; 
+                return;
             foreach (var Record in Records)
             {
-                 
+
                 var property = Record.GetType().GetProperty(Key);
                 var targetObject = property.GetValue(Record, null);
                 if (targetObject is null)
@@ -34,8 +34,8 @@ namespace Lookif.UI.Component.DropDown
 
                 property = Record.GetType().GetProperty(Value);
                 var DropDownValue = property.GetValue(Record, null).ToString();
-
-                SanitizedRecords.Add(DropDownKey, DropDownValue);
+                if (!SanitizedRecords.ContainsKey(DropDownKey))
+                    SanitizedRecords.Add(DropDownKey, DropDownValue);
             }
         }
 
@@ -61,7 +61,7 @@ namespace Lookif.UI.Component.DropDown
 
         }
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
-        { 
+        {
             var SelectedValue = changeEventArgs.Value.ToString();
 
             var (obj, IsItChanged) = SetIdFromName(SelectedValue);

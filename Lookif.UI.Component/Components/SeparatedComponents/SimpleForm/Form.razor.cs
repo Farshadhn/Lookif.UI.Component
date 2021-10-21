@@ -16,6 +16,9 @@ using Microsoft.Extensions.Localization;
 using System.Globalization;
 using System.ComponentModel;
 using System.Threading;
+using Blazored.Modal;
+using Blazored.Modal.Services;
+using Lookif.UI.Component.Modals;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
@@ -66,6 +69,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task Add()
         {
+            var IsItReallyOkay = await Confirm();
+            if (!IsItReallyOkay)
+                return;
             object insertOrUpdate = Activator.CreateInstance(Dto);
 
             foreach (var item in ItemsOfClasses)
@@ -169,10 +175,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         #region ... Functions...
 
 
-
+        private async Task<bool> Confirm()
+        {
+            var parameters = new ModalParameters(); 
+            parameters.Add("YES", basicResource["YES"].Value); 
+            parameters.Add("NO", basicResource["NO"].Value); 
+            var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
+            var result = await MessageForm.Result;
+            return !result.Cancelled;
+        }
 
         private async Task Edit(string id)
         {
+
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
             var response = await dataObj.Content.ReadAsStringAsync();
 
@@ -275,8 +290,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
 
-
-
+         
         private async Task Init()
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
@@ -336,18 +350,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             List<RelatedTo> relatedTos = new();
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
 
-            Console.WriteLine(sendToAddress);
+      
             var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
             var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync(cancellationToken));
-            Console.WriteLine(SerializeObject(data));
-            foreach (var item in data.Data)
-            {
-                Console.WriteLine(relatedTo.DisplayName);
+                    foreach (var item in data.Data)
+            { 
                 var idProp = item.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
                 var displayProp = item.GetType().GetProperty(relatedTo.DisplayName, BindingFlags.Public | BindingFlags.Instance);
-                Console.WriteLine(displayProp);
+               
                 var a = new RelatedTo() { Name = displayProp?.GetValue(item, null)?.ToString(), Id = idProp?.GetValue(item, null)?.ToString() };
 
                 relatedTos.Add(a);
@@ -358,12 +370,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         #endregion
 
         #region ... Parameter...
-
+         
         [Parameter]
         public IStringLocalizer Resource { get; set; }
         [Parameter] public EventCallback<string> OnFinished { get; set; }
         [Parameter] public Type Dto { get; set; }
         [Parameter] public string Key { get; set; }
+        [CascadingParameter] public IModalService Modal { get; set; }
+
 
         #endregion
 

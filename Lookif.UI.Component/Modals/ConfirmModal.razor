@@ -1,17 +1,15 @@
 ﻿@namespace Lookif.UI.Component.Modals
 
 
-<div style="width: 70vw;direction: rtl;">
-
-    <p>
-        @Title
-    </p>
-
-
-    <button @onclick="() => OnConfirm(Data)" class="btn btn-primary">بله</button> 
-    <button @onclick="OnCancel" class="btn btn-primary">خیر</button> 
+<div style="width: 200px; text-align-last: center;">
+    <button @onclick="OnCancel" class="btn btn-info">@NO</button> 
+    <button @onclick="OnConfirm" class="btn btn-warning">@YES</button> 
 </div>
 
 
 
- 
+ <style>
+     h3 {
+     font-family:'IranSansBold'
+     }
+     </style>

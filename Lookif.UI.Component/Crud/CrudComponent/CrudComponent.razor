@@ -4,14 +4,24 @@
 @typeparam TItem
 @typeparam TSelectItem
 
+@using System.Globalization
 @using Microsoft.Extensions.Localization;
 @using Lookif.UI.Component.Resources
 @inject IStringLocalizer<Resource> basicResource
 @{
-   var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
 }
-<div class="row text-center" dir="rtl">
+@if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
+{
+
+    <style>
+        .ChangeDirection {
+        direction:rtl;
+        }
+    </style>
+}
+<div class="row text-center IranSansBold ChangeDirection">
 
     <h3 class="col-12 alert alert-info">@basicResource["FormTitle"] @FormName</h3>
 

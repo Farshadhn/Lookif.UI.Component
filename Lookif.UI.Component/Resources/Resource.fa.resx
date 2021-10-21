@@ -165,10 +165,19 @@
   <data name="Insert" xml:space="preserve">
     <value>وارد کردن</value>
   </data>
+  <data name="NO" xml:space="preserve">
+    <value>خیر</value>
+  </data>
   <data name="NoRecord" xml:space="preserve">
     <value>داده ای برای نمایش موجود نیست</value>
   </data>
   <data name="Total" xml:space="preserve">
     <value>تعداد کل</value>
+  </data>
+  <data name="WarnSignForConfirm" xml:space="preserve">
+    <value>آیا مطمئن هستید؟</value>
+  </data>
+  <data name="YES" xml:space="preserve">
+    <value>بله</value>
   </data>
 </root>

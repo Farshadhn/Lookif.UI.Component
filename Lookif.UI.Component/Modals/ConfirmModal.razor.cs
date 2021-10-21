@@ -15,22 +15,19 @@ namespace Lookif.UI.Component.Modals
 
 
         async Task OnCancel()
-        {
-            await OnCancelEventCallback.InvokeAsync();
+        { 
             await BlazoredModal.CloseAsync(ModalResult.Cancel());
            
         }
 
-        async Task OnConfirm(object data)
-        {
-            await OnConfirmEventCallback.InvokeAsync(data);
+        async Task OnConfirm()
+        { 
             await BlazoredModal.CloseAsync(ModalResult.Ok(true));
         }
-
-        [Parameter] public object Data{ get; set; }
-        [Parameter] public EventCallback<object> OnConfirmEventCallback { get; set; }
-        [Parameter] public EventCallback OnCancelEventCallback { get; set; }
+         
         [Parameter] public string Title { get; set; }
+        [Parameter] public string YES { get; set; }
+        [Parameter] public string NO { get; set; }
         [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
     }
 }

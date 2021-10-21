@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using Microsoft.Extensions.Localization;
 using Blazored.Toast.Services;
+using Lookif.UI.Component.Modals;
 
 namespace Lookif.UI.Component.Grids
 {
@@ -36,6 +37,7 @@ namespace Lookif.UI.Component.Grids
         {
             var dataObj = await Http.GetFromJsonAsync<ApiResult<List<TSelectItem>>>($"{ModelName}/Get");
             Records = dataObj.Data;
+
             return ConvertInputToListOfValuePlaceHolders(dataObj.Data);
 
         }
@@ -191,11 +193,25 @@ namespace Lookif.UI.Component.Grids
 
 
         #region  ...Events...
+
+        private async Task<bool> Confirm()
+        {
+            var parameters = new ModalParameters();
+            parameters.Add("YES", basicResource["YES"].Value);
+            parameters.Add("NO", basicResource["NO"].Value);
+            var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
+            var result = await MessageForm.Result;
+            return !result.Cancelled;
+        }
+
         private async Task Delete(string Id)
         {
+            var IsItReallyOkay = await Confirm();
+            if (!IsItReallyOkay)
+                return;
             await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
-            toastService.ShowSuccess(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
+            toastService.ShowError(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
             await OnDeleteFinished.InvokeAsync(Id);
 
 

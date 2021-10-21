@@ -1,13 +1,25 @@
 ﻿@namespace Lookif.UI.Component.Components.SeparatedComponents
 @using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
+
+@using System.Globalization
+@using Microsoft.Extensions.Localization;
 @using Microsoft.Extensions.Localization;
 @using Lookif.UI.Component.Resources
 @inject IStringLocalizer<Resource> basicResource
-<div style="width: 70vw;direction: rtl;">
+@if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
+{
+
+    <style>
+        .ChangeDirection {
+            direction: rtl;
+        }
+    </style>
+}
+<div class="IranSansBold ChangeDirection" style="width: 70vw;">
 
     <Form Dto="@MyTItem" Key="@MyKey" OnFinished="MyOnFinished" Resource="Resource"></Form>
 
 
-    
+
 </div>
