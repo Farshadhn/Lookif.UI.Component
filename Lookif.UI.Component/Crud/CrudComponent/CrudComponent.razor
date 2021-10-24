@@ -15,9 +15,23 @@
 @if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
 {
 
+
+
     <style>
         .ChangeDirection {
-        direction:rtl;
+            direction: rtl;
+        }
+
+        .FormAlign {
+            float: right;
+        }
+    </style>
+}
+else
+{
+    <style>
+        .FormAlign {
+            float: left;
         }
     </style>
 }
