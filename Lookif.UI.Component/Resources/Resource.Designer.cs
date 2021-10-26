@@ -205,7 +205,7 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to no.
+        ///   Looks up a localized string similar to No.
         /// </summary>
         internal static string NO {
             get {
@@ -223,7 +223,7 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Total.
+        ///   Looks up a localized string similar to Row Count.
         /// </summary>
         internal static string Total {
             get {
@@ -241,7 +241,7 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to yes.
+        ///   Looks up a localized string similar to Yes.
         /// </summary>
         internal static string YES {
             get {

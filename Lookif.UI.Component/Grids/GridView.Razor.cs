@@ -23,7 +23,7 @@ namespace Lookif.UI.Component.Grids
     {
 
 
-        private int _count = 5;
+        private int _count = 100;
         [Inject] HttpClient Http { get; set; }
         [Inject] IToastService toastService { get; set; }
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");

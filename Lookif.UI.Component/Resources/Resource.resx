@@ -166,18 +166,18 @@
     <value>Insert</value>
   </data>
   <data name="NO" xml:space="preserve">
-    <value>no</value>
+    <value>No</value>
   </data>
   <data name="NoRecord" xml:space="preserve">
     <value>NoRecord</value>
   </data>
   <data name="Total" xml:space="preserve">
-    <value>Total</value>
+    <value>Row Count</value>
   </data>
   <data name="WarnSignForConfirm" xml:space="preserve">
     <value>Do you want to precede?</value>
   </data>
   <data name="YES" xml:space="preserve">
-    <value>yes</value>
+    <value>Yes</value>
   </data>
 </root>
