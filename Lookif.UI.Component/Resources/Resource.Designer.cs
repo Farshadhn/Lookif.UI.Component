@@ -241,6 +241,33 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Upload Error.
+        /// </summary>
+        internal static string WarnSignForErrorUpload {
+            get {
+                return ResourceManager.GetString("WarnSignForErrorUpload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your file is too big..
+        /// </summary>
+        internal static string WarnSignForErrorUpload_BigFile {
+            get {
+                return ResourceManager.GetString("WarnSignForErrorUpload-BigFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Incorrect Format.
+        /// </summary>
+        internal static string WarnSignForErrorUpload_FormatFile {
+            get {
+                return ResourceManager.GetString("WarnSignForErrorUpload-FormatFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Yes.
         /// </summary>
         internal static string YES {

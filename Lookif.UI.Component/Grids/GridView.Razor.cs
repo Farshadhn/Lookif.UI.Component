@@ -29,7 +29,8 @@ namespace Lookif.UI.Component.Grids
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");
 
 
-        List<LocalizedString> relatedSource = new List<LocalizedString>();
+        List<LocalizedString> relatedSource;
+        List<LocalizedString> commonResource; //Used For Buttons 
 
 
 
@@ -84,9 +85,9 @@ namespace Lookif.UI.Component.Grids
                             }
                             else if (item.TypeOfObject == typeof(bool))
                             {
-
                                 bool a = (bool)Convert.ChangeType(prop.GetValue(input, null), typeof(bool))!;
-                                vph.ObjectValue = a ? "بله" : "خیر";
+
+                                vph.ObjectValue = a ? commonResource.FirstOrDefault(x => x.Name == "YES").Value : commonResource.FirstOrDefault(x => x.Name == "NO").Value;
                             }
                             else
                             {
