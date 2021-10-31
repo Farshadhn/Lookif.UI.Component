@@ -14,7 +14,8 @@
 @typeparam TSelectItem
 @typeparam TItem
 @{
-    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+    relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+    commonResource = ((IStringLocalizer)basicResource)?.GetAllStrings()?.ToList();
 
 }
 
@@ -46,6 +47,7 @@ else
     <table class="table table-hover table-responsive">
         <thead>
             <tr style="background-color: gainsboro;">
+                <th></th>
                 @{
                     foreach (var item in PropertyInformations)
                     {
@@ -93,7 +95,7 @@ else
                     }
                 }
 
-                <th></th>
+
             </tr>
         </thead>
         @if (PagedRecords is null || !PagedRecords.Any())
@@ -110,8 +112,25 @@ else
             {
 
                 <tr style=" text-align-last: center;">
+
                     @{
                         var Id = string.Empty;
+                        <td>
+
+
+                            @if (EditBtn)
+                            {
+                                <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
+
+                            }
+                            @if (DeleteBtn)
+                            {
+                                <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
+
+                            }
+
+
+                        </td>
                         @foreach (var item in record)
                         {
 
@@ -127,22 +146,7 @@ else
                                 </td>
                             }
                         }
-                <td>
 
-
-                    @if (EditBtn)
-                    {
-                        <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) " ></i>
-
-                    }
-                    @if (DeleteBtn)
-                    {
-                        <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i> 
-
-                    }
-
-
-                </td>
                     }
                 </tr>
             }

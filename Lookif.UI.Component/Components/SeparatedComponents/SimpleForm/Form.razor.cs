@@ -19,6 +19,10 @@ using System.Threading;
 using Blazored.Modal;
 using Blazored.Modal.Services;
 using Lookif.UI.Component.Modals;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Components.Forms;
+using System.IO;
+using Lookif.Library.Common.CommonModels;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
@@ -56,11 +60,11 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (Key != default)
                     await Edit(Key);
 
-                
+
                 StateHasChanged();
             }
         }
-       
+
 
 
         /// <summary>
@@ -89,8 +93,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     prop.SetValue(insertOrUpdate, item.DateTime, null);
                     continue;
-                }// ToDo Make it like the others
-
+                }
+                if (targetType == typeof(UploadModel))
+                {
+                    prop.SetValue(insertOrUpdate, item.FileValue, null);
+                    continue;
+                }
 
                 if (String.IsNullOrEmpty(item?.Value)) continue;
 
@@ -106,7 +114,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
                     var error = basicResource["InputError"].Value;
-                    toastService.ShowError($"{error}:  -'{rs}'-", basicResource["InputErrorHeader"].Value); 
+                    toastService.ShowError($"{error}:  -'{rs}'-", basicResource["InputErrorHeader"].Value);
                     return;
                 }
 
@@ -150,7 +158,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             }
             await Clear();
 
-            await OnFinished.InvokeAsync(returnStr); 
+            await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
 
         }
@@ -177,9 +185,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task<bool> Confirm()
         {
-            var parameters = new ModalParameters(); 
-            parameters.Add("YES", basicResource["YES"].Value); 
-            parameters.Add("NO", basicResource["NO"].Value); 
+            var parameters = new ModalParameters();
+            parameters.Add("YES", basicResource["YES"].Value);
+            parameters.Add("NO", basicResource["NO"].Value);
             var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
             var result = await MessageForm.Result;
             return !result.Cancelled;
@@ -208,6 +216,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
                 else if (prop?.PropertyType == typeof(Boolean))
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
+
+
                 else
                     item!.Value = prop?.GetValue(data, null)?.ToString();
 
@@ -288,9 +298,42 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
 
+        private void CheckValidation(IBrowserFile browserFile, ItemsOfClass ioc)
+        {
+            var limit = ioc.property.GetCustomAttribute<FileAttribute>();  
+            if (browserFile.Size > limit.MaxLength)
+               throw new Exception(basicResource["WarnSignForErrorUpload-BigFile"].Value);
 
+            
+            var format = browserFile.Name.Split(".")[^1]; 
+            
+            if(limit.types.Any() &&  !limit.types.Contains(format))
+                throw new Exception(basicResource["WarnSignForErrorUpload-FormatFile"].Value);
 
-         
+        }
+
+        private async Task Upload(InputFileChangeEventArgs e, ItemsOfClass ioc)
+        {
+            try
+            {
+                MemoryStream ms = new ();
+                CheckValidation(e.File, ioc);
+
+                await e.File.OpenReadStream(maxAllowedSize: 10512000).CopyToAsync(ms);
+                ioc.FileValue = new UploadModel()
+                {
+                    File = ms.ToArray(),
+                    FileName = e.File.Name
+                };
+            }
+            catch (Exception ex)
+            {
+
+                toastService.ShowError(basicResource["WarnSignForErrorUpload"].Value, ex.Message);
+            }
+           
+        }
+
         private async Task Init()
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
@@ -298,7 +341,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
             {
-                var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
+                var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>(); 
 
                 if (!(hiddenDto is null)) // What we don't want to include in our form
                     continue;
@@ -319,7 +362,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
                 else
                 {
-                    if (property.PropertyType == typeof(String))
+                    if (property.PropertyType == typeof(UploadModel))
+                            ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File,property = property });
+                    else if (property.PropertyType == typeof(String))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
                     else if (property.PropertyType == typeof(DateTime))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
@@ -350,16 +395,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             List<RelatedTo> relatedTos = new();
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
 
-      
+
             var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
             var data = DeserializeObject<ApiResult<List<RelatedTo>>>(await res.Content.ReadAsStringAsync(cancellationToken));
-                    foreach (var item in data.Data)
-            { 
+            foreach (var item in data.Data)
+            {
                 var idProp = item.GetType().GetProperty("Id", BindingFlags.Public | BindingFlags.Instance);
                 var displayProp = item.GetType().GetProperty(relatedTo.DisplayName, BindingFlags.Public | BindingFlags.Instance);
-               
+
                 var a = new RelatedTo() { Name = displayProp?.GetValue(item, null)?.ToString(), Id = idProp?.GetValue(item, null)?.ToString() };
 
                 relatedTos.Add(a);
@@ -370,7 +415,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         #endregion
 
         #region ... Parameter...
-         
+
         [Parameter]
         public IStringLocalizer Resource { get; set; }
         [Parameter] public EventCallback<string> OnFinished { get; set; }
@@ -408,12 +453,13 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         public string Name { get; set; }
         public string Value { get; set; } = "";
+        public UploadModel FileValue { get; set; }
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
         public DateTime DateTime { get; set; }
         public bool Valuebool { get; set; }
-
+        public PropertyInfo property { get; set; }
         public int Order { get; set; }
     }
 
@@ -430,7 +476,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
     /// </summary>
     public enum TypeOfInput
     {
-        Text, DropDown, DateTime, CheckBox, Enum
+        Text, DropDown, DateTime, CheckBox, Enum, File
     }
 
 

@@ -3,7 +3,8 @@
 @using Lookif.UI.Component.DropDown
 @using Lookif.UI.Component.Resources
 
-@using Microsoft.Extensions.Localization; 
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Localization;
 @inject IStringLocalizer<Resource> basicResource
 @{
     relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
@@ -60,7 +61,12 @@
                 }
                 else if (item.Type is TypeOfInput.CheckBox)
                 {
-                    <input class="form-control" type="checkbox" @onchange='(x=>item.Value = ((bool)x.Value).ToString())' />
+                    <input class="form-control" type="checkbox" @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
+
+                }
+                else if (item.Type is TypeOfInput.File)
+                {
+                    <InputFile OnChange="(e)=>Upload(e,item)" multiple />
 
                 }
             </div>

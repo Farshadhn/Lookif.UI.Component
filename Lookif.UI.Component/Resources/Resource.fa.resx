@@ -177,6 +177,15 @@
   <data name="WarnSignForConfirm" xml:space="preserve">
     <value>آیا مطمئن هستید؟</value>
   </data>
+  <data name="WarnSignForErrorUpload" xml:space="preserve">
+    <value>خطای آپلود</value>
+  </data>
+  <data name="WarnSignForErrorUpload-BigFile" xml:space="preserve">
+    <value>فایل بیش از حد مجاز است</value>
+  </data>
+  <data name="WarnSignForErrorUpload-FormatFile" xml:space="preserve">
+    <value>فرمت انتخابی نامعتبر است</value>
+  </data>
   <data name="YES" xml:space="preserve">
     <value>بله</value>
   </data>
