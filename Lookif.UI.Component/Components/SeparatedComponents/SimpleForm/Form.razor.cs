@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using Lookif.Library.Common.CommonModels;
+using System.Dynamic;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
@@ -94,11 +95,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     prop.SetValue(insertOrUpdate, item.DateTime, null);
                     continue;
                 }
-                if (targetType == typeof(UploadModel))
-                {
-                    prop.SetValue(insertOrUpdate, item.FileValue, null);
-                    continue;
-                }
+
 
                 if (String.IsNullOrEmpty(item?.Value)) continue;
 
@@ -131,7 +128,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             var returnStr = String.Empty;
             var notificationText = String.Empty;
-            var notificationHeaderText = String.Empty;
+            var notificationHeaderText = String.Empty; 
             if (Key == default)
             {
 
@@ -300,14 +297,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private void CheckValidation(IBrowserFile browserFile, ItemsOfClass ioc)
         {
-            var limit = ioc.property.GetCustomAttribute<FileAttribute>();  
+            var limit = ioc.property.GetCustomAttribute<FileAttribute>();
             if (browserFile.Size > limit.MaxLength)
-               throw new Exception(basicResource["WarnSignForErrorUpload-BigFile"].Value);
+                throw new Exception(basicResource["WarnSignForErrorUpload-BigFile"].Value);
 
-            
-            var format = browserFile.Name.Split(".")[^1]; 
-            
-            if(limit.types.Any() &&  !limit.types.Contains(format))
+
+            var format = browserFile.Name.Split(".")[^1];
+
+            if (limit.types.Any() && !limit.types.Contains(format))
                 throw new Exception(basicResource["WarnSignForErrorUpload-FormatFile"].Value);
 
         }
@@ -316,22 +313,32 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             try
             {
-                MemoryStream ms = new ();
+                MemoryStream ms = new();
                 CheckValidation(e.File, ioc);
 
                 await e.File.OpenReadStream(maxAllowedSize: 10512000).CopyToAsync(ms);
-                ioc.FileValue = new UploadModel()
+
+                 
+                var ImageFile = new UploadModel()
                 {
                     File = ms.ToArray(),
                     FileName = e.File.Name
-                };
+                }; 
+                var responseMessage = await Http.PostAsJsonAsync($"FileModel/Upload", ImageFile);
+                var res = DeserializeObject<ApiResult<string>>(await responseMessage.Content.ReadAsStringAsync()); 
+                if (res.IsSuccess)
+                {
+                    ioc.Value = res.Data;
+                }
+                    
+
             }
             catch (Exception ex)
             {
 
                 toastService.ShowError(basicResource["WarnSignForErrorUpload"].Value, ex.Message);
             }
-           
+
         }
 
         private async Task Init()
@@ -341,7 +348,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
             {
-                var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>(); 
+                var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
 
                 if (!(hiddenDto is null)) // What we don't want to include in our form
                     continue;
@@ -353,6 +360,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 var relatedTo = property.GetCustomAttribute<RelatedToAttribute>();// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
+                var file = property.GetCustomAttribute<FileAttribute>();
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
@@ -362,8 +370,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
                 else
                 {
-                    if (property.PropertyType == typeof(UploadModel))
-                            ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File,property = property });
+                    if (file is not null)
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property });
                     else if (property.PropertyType == typeof(String))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
                     else if (property.PropertyType == typeof(DateTime))
@@ -453,7 +461,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         public string Name { get; set; }
         public string Value { get; set; } = "";
-        public UploadModel FileValue { get; set; }
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;

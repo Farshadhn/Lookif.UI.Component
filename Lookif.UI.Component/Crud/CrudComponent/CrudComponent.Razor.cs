@@ -34,10 +34,10 @@ namespace Lookif.UI.Component.Crud.CrudComponent
 
         }
         private async Task Bind(string inserted = default)
-        {  
-            var dataObj = await Http.GetFromJsonAsync<object>($"{ModelName}/Get");
-             
-            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(dataObj.ToString()!);
+        {
+           
+            var dataObj = await Http.GetAsync($"{ModelName}/Get"); 
+            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(await dataObj.Content.ReadAsStringAsync()); 
              
             Records = data.Data;
 

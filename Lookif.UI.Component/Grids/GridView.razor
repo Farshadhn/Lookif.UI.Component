@@ -113,8 +113,8 @@ else
 
                 <tr style=" text-align-last: center;">
 
-                    @{
-                        var Id = string.Empty;
+                    @{ 
+                        var Id = record.FirstOrDefault(x=>x.ObjectName == "Id").ObjectValue;
                         <td>
 
 
@@ -134,17 +134,13 @@ else
                         @foreach (var item in record)
                         {
 
-                            if (item.ObjectName == "Id")
+                            if (item.ObjectName != "Id")
                             {
-                                Id = item.ObjectValue;
-
-                            }
-                            else
-                            {
+                                
                                 <td style="vertical-align: middle;font-size: large;font-weight: 100">
                                     @item.ObjectValue
                                 </td>
-                            }
+                            } 
                         }
 
                     }
