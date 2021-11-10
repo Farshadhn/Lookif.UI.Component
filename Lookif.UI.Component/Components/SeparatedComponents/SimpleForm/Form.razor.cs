@@ -24,7 +24,6 @@ using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using Lookif.Library.Common.CommonModels;
 using System.Dynamic;
-
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
     public static class TypeExtensions
@@ -74,9 +73,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task Add()
         {
-            var IsItReallyOkay = await Confirm();
-            if (!IsItReallyOkay)
-                return;
+            if (Key != default)
+            {
+                var IsItReallyOkay = await Confirm(); 
+
+                if (!IsItReallyOkay)
+                    return;
+            }
+
             object insertOrUpdate = Activator.CreateInstance(Dto);
 
             foreach (var item in ItemsOfClasses)
@@ -85,7 +89,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (null == prop || !prop.CanWrite) continue;
 
 
-
+          
 
                 var targetType = prop.PropertyType.IsNullableType()
                                   ? Nullable.GetUnderlyingType(prop.PropertyType)
@@ -95,6 +99,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     prop.SetValue(insertOrUpdate, item.DateTime, null);
                     continue;
                 }
+                     
 
 
                 if (String.IsNullOrEmpty(item?.Value)) continue;
@@ -106,6 +111,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
                     prop.SetValue(insertOrUpdate, convertedValue, null);
+       
                 }
                 catch (Exception ex)
                 {
@@ -115,23 +121,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     return;
                 }
 
-
-
-
-
-
-
-
-
-
-            }
-
+            } 
             var returnStr = String.Empty;
             var notificationText = String.Empty;
-            var notificationHeaderText = String.Empty; 
+            var notificationHeaderText = String.Empty;
+
+          
+            await Init();
+        
             if (Key == default)
             {
-
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
                 var res = DeserializeObject<ApiResult<object>>(await responseMessage.Content.ReadAsStringAsync());
                 if (!res.IsSuccess)
@@ -153,11 +152,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 notificationHeaderText = basicResource["DoneEditingHeader"].Value;
 
             }
-            await Clear();
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
-
         }
 
         #endregion
@@ -169,7 +166,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         List<LocalizedString> relatedSource { get; set; }
         private string ModelName => Dto.Name.Replace("Dto", "");
 
-        public IList<ItemsOfClass> ItemsOfClasses { get; set; } = new List<ItemsOfClass>();
+        public List<ItemsOfClass> ItemsOfClasses { get; set; } = new List<ItemsOfClass>();
 
 
 
@@ -186,7 +183,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             parameters.Add("YES", basicResource["YES"].Value);
             parameters.Add("NO", basicResource["NO"].Value);
             var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
-            var result = await MessageForm.Result;
+            var result = await MessageForm.Result; 
             return !result.Cancelled;
         }
 
@@ -318,19 +315,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 await e.File.OpenReadStream(maxAllowedSize: 10512000).CopyToAsync(ms);
 
-                 
+
                 var ImageFile = new UploadModel()
                 {
                     File = ms.ToArray(),
                     FileName = e.File.Name
-                }; 
+                };
                 var responseMessage = await Http.PostAsJsonAsync($"FileModel/Upload", ImageFile);
-                var res = DeserializeObject<ApiResult<string>>(await responseMessage.Content.ReadAsStringAsync()); 
+                var res = DeserializeObject<ApiResult<string>>(await responseMessage.Content.ReadAsStringAsync());
                 if (res.IsSuccess)
                 {
                     ioc.Value = res.Data;
                 }
-                    
+
 
             }
             catch (Exception ex)
@@ -343,8 +340,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Init()
         {
+          
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
+            await Task.Delay(300);
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
             {
@@ -365,19 +364,21 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
                     var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown });
+                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown, Value = "" });
+                  
 
                 }
                 else
                 {
                     if (file is not null)
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property });
+
                     else if (property.PropertyType == typeof(String))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
                     else if (property.PropertyType == typeof(DateTime))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
                     else if (property.PropertyType == typeof(Boolean))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox , Valuebool=false });
                     else if (property.PropertyType.IsEnum)
                     {
                         var list = FillEnum(property, displayName);
@@ -385,15 +386,23 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     }
                     else
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+
+                   
                 }
 
             }
+            Task.WaitAll(); 
         }
 
 
         private async Task Clear()
         {
-            await Init();
+
+          
+            await Init(); 
+
+
+
         }
 
 
@@ -458,9 +467,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             this.Order = order;
         }
+        public ItemsOfClass()
+        {
 
+        }
         public string Name { get; set; }
-        public string Value { get; set; } = "";
+        public string Value { get; set; } = ""; 
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
@@ -468,6 +480,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public bool Valuebool { get; set; }
         public PropertyInfo property { get; set; }
         public int Order { get; set; }
+      
+       
+
     }
 
 

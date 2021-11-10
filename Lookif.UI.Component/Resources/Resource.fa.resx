@@ -130,7 +130,7 @@
     <value>حذف</value>
   </data>
   <data name="DoneAdding" xml:space="preserve">
-    <value>افزودن با موقیت انجام شد</value>
+    <value>افزودن با موفقیت انجام شد</value>
   </data>
   <data name="DoneAddingHeader" xml:space="preserve">
     <value>افزودن</value>
@@ -149,6 +149,9 @@
   </data>
   <data name="Edit" xml:space="preserve">
     <value>ویرایش</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>فیلترها</value>
   </data>
   <data name="FormTitle" xml:space="preserve">
     <value>ساخت</value>

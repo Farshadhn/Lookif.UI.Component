@@ -150,8 +150,11 @@
   <data name="Edit" xml:space="preserve">
     <value>Edit</value>
   </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filters</value>
+  </data>
   <data name="FormTitle" xml:space="preserve">
-    <value>Create</value>
+    <value>Submit</value>
   </data>
   <data name="GridTitle" xml:space="preserve">
     <value>List of </value>

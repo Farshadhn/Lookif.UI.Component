@@ -17,6 +17,7 @@ using Microsoft.Extensions.Localization;
 using Blazored.Toast.Services;
 using Lookif.UI.Component.Modals;
 using static Newtonsoft.Json.JsonConvert;
+
 namespace Lookif.UI.Component.Grids
 {
     public partial class GridView<TSelectItem, TItem> where TItem : class
@@ -35,9 +36,10 @@ namespace Lookif.UI.Component.Grids
 
 
         private async Task<List<List<ValuePlaceHolder>>> Bind()
-        { 
-            var dataObj = await Http.GetFromJsonAsync<ApiResult<List<TSelectItem>>>($"{ModelName}/Get"); 
-            Records = dataObj.Data; 
+        {
+            var dataObj = await Http.GetFromJsonAsync<ApiResult<List<TSelectItem>>>($"{ModelName}/Get");
+            Records = dataObj.Data;
+
             return ConvertInputToListOfValuePlaceHolders(dataObj.Data);
 
         }
@@ -115,15 +117,13 @@ namespace Lookif.UI.Component.Grids
         /// To find all properties from unknown input
         /// </summary>
         private void FindAllProperties()
-        { 
+        {
             PropertyInformations = new List<PropertyInformation>();
-             
             foreach (var item in typeof(TSelectItem).GetProperties())
             {
 
                 var key = item.GetCustomAttribute<KeyAttribute>();
                 var hiddenItem = item.GetCustomAttribute<HiddenAttribute>();
-               
                 Type type = item.PropertyType;
                 if ((!(hiddenItem is null) || type == typeof(Guid)) && (key is null))
                 {
@@ -233,7 +233,8 @@ namespace Lookif.UI.Component.Grids
         {
             await base.OnParametersSetAsync();
 
-            FilteredRecords = new List<List<ValuePlaceHolder>>(); 
+            FilteredRecords = new List<List<ValuePlaceHolder>>();
+
             ConvertedRecords = (Records is null || Records == default) ? await Bind() : ConvertedRecords;
             if (ConvertedRecords is null)
                 return;

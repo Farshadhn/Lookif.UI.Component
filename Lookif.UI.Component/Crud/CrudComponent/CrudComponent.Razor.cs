@@ -20,7 +20,7 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         [Inject] HttpClient Http { get; set; }
         public List<TSelectItem> Records = new List<TSelectItem>();
 
-         
+        [Parameter] public bool DeleteBtn { get; set; } = true;
 
         private string ModelName => typeof(TItem).Name.Replace("Dto", "");
         [Parameter]
@@ -34,10 +34,10 @@ namespace Lookif.UI.Component.Crud.CrudComponent
 
         }
         private async Task Bind(string inserted = default)
-        {
-           
-            var dataObj = await Http.GetAsync($"{ModelName}/Get"); 
-            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(await dataObj.Content.ReadAsStringAsync()); 
+        {  
+            var dataObj = await Http.GetFromJsonAsync<object>($"{ModelName}/Get");
+             
+            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(dataObj.ToString()!);
              
             Records = data.Data;
 
