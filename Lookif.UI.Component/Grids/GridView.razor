@@ -31,7 +31,12 @@
             direction: ltr;
             text-align-last: left;
         }
+
             .myGridView th {
+                text-align-last: left;
+            }
+
+            .myGridView tr {
                 text-align-last: left;
             }
     </style>
@@ -44,7 +49,12 @@ else
             text-align: right;
             direction: rtl;
         }
+
             .myGridView th {
+                text-align-last: right;
+            }
+
+            .myGridView tr {
                 text-align-last: right;
             }
     </style>
@@ -57,92 +67,97 @@ else
             <tr style="background-color: gainsboro;">
                 <th style="font-style:inherit">@basicResource["Filter"]</th>
                 @{ foreach (var item in PropertyInformations)
-                                {
-                                    if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
-                                        continue;
-                                    //text - align - last: center;
-                    <th style=" min-width: 15vw;">
-                        <span style="vertical-align: middle;font-size:larger;">
-                            @{ if (relatedSource is null) // When there is no source file
-                                                {
-                                                    if (@item.Displayname is null) // when there is no displayName
-                                                    {
-                                @item.PropertyName }
-                                                    else
-                                                    {
-                                @item.Displayname }
-                                                }
-                                                else
-                                                {
-                                                    var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
-                                                    if (value == "")
-                                                    {
-                                @item.PropertyName }
-                                                    else
-                                                    {
-                                @value }
 
-                                                } }
+                    {
+                        if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
+                            continue;
+                        //text - align - last: center;
+                        <th style=" min-width: 15vw;">
+                            <span style="vertical-align: middle;font-size:larger;">
+                                @{ if (relatedSource is null) // When there is no source file
+                                    {
+                                        if (@item.Displayname is null) // when there is no displayName
+                                        {
+                                            @item.PropertyName }
+                                        else
+                                        {
+                                            @item.Displayname }
+                                    }
+                                    else
+                                    {
+                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
+                                        if (value == "")
+                                        {
+                                            @item.PropertyName }
+                                        else
+                                        {
+                                            @value }
 
-                        </span>
-                        @*<div>
-                            <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
-                            <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
-                        </div>*@
-                        <div>
-                            <input type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
-                        </div>
-                    </th> } }
+                                    } }
+
+                            </span>
+                            @*<div>
+                                    <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
+                                    <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
+                                </div>*@
+                            <div>
+                                <input type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
+                            </div>
+                        </th>
+                    } }
 
 
             </tr>
         </thead>
         @if (PagedRecords is null || !PagedRecords.Any())
         {
-    <tr>
-        <td colspan="@PropertyInformations.Count()">
-            <p>@basicResource["NoRecord"]</p>
-        </td>
-    </tr> }
-                else
-                {
-    @foreach (var record in PagedRecords)
-    {
-
-    <tr style=" text-align-last: center;">
-
-        @{
-            var Id = record.FirstOrDefault(x => x.ObjectName == "Id").ObjectValue;
-            <td>
-
-
-                @if (EditBtn)
-                {
-                    <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
-
-                }
-                @if (DeleteBtn)
-                {
-                    <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
-
-                }
-
-
-            </td>
-            @foreach (var item in record)
+            <tr>
+                <td colspan="@PropertyInformations.Count()">
+                    <p>@basicResource["NoRecord"]</p>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var record in PagedRecords)
             {
 
-                if (item.ObjectName != "Id")
-                {
+                @*<tr style=" text-align-last: center;">*@
+                <tr>
 
-                    <td style="vertical-align: middle;font-size: large;font-weight: 100">
-                        @item.ObjectValue
-                    </td>
-                }
-            }
+                    @{
+                        var Id = record.FirstOrDefault(x => x.ObjectName == "Id").ObjectValue;
+                        <td>
 
-        }
-    </tr>}}
+
+                            @if (EditBtn)
+                            {
+                                <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
+
+                            }
+                            @if (DeleteBtn)
+                            {
+                                <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
+
+                            }
+
+
+                        </td>
+                        @foreach (var item in record)
+                        {
+
+                            if (item.ObjectName != "Id")
+                            {
+
+                                <td style="vertical-align: middle;font-size: large;font-weight: 100">
+                                    @item.ObjectValue
+                                </td>
+                            }
+                        }
+
+                    }
+                </tr>
+            }}
     </table>
 
     <div class="row">

@@ -126,15 +126,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             var notificationText = String.Empty;
             var notificationHeaderText = String.Empty;
 
-          
-            await Init();
-        
+
+
+
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
                 var res = DeserializeObject<ApiResult<object>>(await responseMessage.Content.ReadAsStringAsync());
                 if (!res.IsSuccess)
                 {
+
                     toastService.ShowError(res.Message, basicResource["InputErrorHeader"].Value);
                     return;
                 }
@@ -152,9 +153,15 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 notificationHeaderText = basicResource["DoneEditingHeader"].Value;
 
             }
+            ItemsOfClasses = new List<ItemsOfClass>();
+            await Task.Delay(100);
+            StateHasChanged();
 
+            await Init(); 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
+ 
+
         }
 
         #endregion
@@ -343,8 +350,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
           
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
-            await Task.Delay(300);
+            await Task.Delay(500);
             PropertyInfo[] propertyInfos = Dto.GetProperties();
+
             foreach (var property in propertyInfos)
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
@@ -407,7 +415,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
         private async Task<List<RelatedTo>> GetRelatedTo(RelatedToAttribute relatedTo, CancellationToken cancellationToken)
-        {
+        { 
             var entityName = relatedTo.Name.Replace("Dto", "");
             List<RelatedTo> relatedTos = new();
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
