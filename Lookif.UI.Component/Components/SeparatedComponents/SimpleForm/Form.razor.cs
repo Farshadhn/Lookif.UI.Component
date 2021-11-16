@@ -75,7 +75,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             if (Key != default)
             {
-                var IsItReallyOkay = await Confirm(); 
+                var IsItReallyOkay = await Confirm();
 
                 if (!IsItReallyOkay)
                     return;
@@ -89,7 +89,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (null == prop || !prop.CanWrite) continue;
 
 
-          
+
 
                 var targetType = prop.PropertyType.IsNullableType()
                                   ? Nullable.GetUnderlyingType(prop.PropertyType)
@@ -99,7 +99,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     prop.SetValue(insertOrUpdate, item.DateTime, null);
                     continue;
                 }
-                     
+
 
 
                 if (String.IsNullOrEmpty(item?.Value)) continue;
@@ -111,7 +111,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
                     prop.SetValue(insertOrUpdate, convertedValue, null);
-       
+
                 }
                 catch (Exception ex)
                 {
@@ -121,13 +121,13 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     return;
                 }
 
-            } 
+            }
             var returnStr = String.Empty;
             var notificationText = String.Empty;
             var notificationHeaderText = String.Empty;
 
 
-
+            await Init();
 
             if (Key == default)
             {
@@ -135,7 +135,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var res = DeserializeObject<ApiResult<object>>(await responseMessage.Content.ReadAsStringAsync());
                 if (!res.IsSuccess)
                 {
-
                     toastService.ShowError(res.Message, basicResource["InputErrorHeader"].Value);
                     return;
                 }
@@ -146,22 +145,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 notificationHeaderText = basicResource["DoneAddingHeader"].Value;
             }
             else
-            {
-
+            { 
                 var responseMessage = await Http.PutAsJsonAsync($"{ModelName}/update/{Key}", insertOrUpdate);
                 notificationText = basicResource["DoneEditing"].Value;
                 notificationHeaderText = basicResource["DoneEditingHeader"].Value;
 
             }
-            ItemsOfClasses = new List<ItemsOfClass>();
-            await Task.Delay(100);
-            StateHasChanged();
 
-            await Init(); 
+
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
- 
-
         }
 
         #endregion
@@ -183,23 +176,24 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         #region ... Functions...
 
-
+        /// <summary>
+        /// Confirm Alert
+        /// </summary>
+        /// <returns></returns>
         private async Task<bool> Confirm()
         {
             var parameters = new ModalParameters();
             parameters.Add("YES", basicResource["YES"].Value);
             parameters.Add("NO", basicResource["NO"].Value);
             var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
-            var result = await MessageForm.Result; 
+            var result = await MessageForm.Result;
             return !result.Cancelled;
         }
 
         private async Task Edit(string id)
         {
-
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
-            var response = await dataObj.Content.ReadAsStringAsync();
-
+            var response = await dataObj.Content.ReadAsStringAsync(); 
             var generic = typeof(ApiResult<>);
             Type constructed = generic.MakeGenericType(Dto);
             var res = DeserializeObject(response!, constructed);
@@ -213,14 +207,20 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             foreach (var item in ItemsOfClasses)
             {
                 PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
+
                 if (prop?.PropertyType == typeof(DateTime))
+                {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
+
+                }
                 else if (prop?.PropertyType == typeof(Boolean))
+                {
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
-
-
+                }
                 else
+                {
                     item!.Value = prop?.GetValue(data, null)?.ToString();
+                }
 
             }
 
@@ -347,12 +347,11 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         private async Task Init()
         {
-          
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
-            await Task.Delay(500);
+            await Task.Delay(300);
             PropertyInfo[] propertyInfos = Dto.GetProperties();
-
             foreach (var property in propertyInfos)
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
@@ -370,10 +369,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var file = property.GetCustomAttribute<FileAttribute>();
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
-                {
+                {  
+                    if (Key != default && !string.IsNullOrEmpty(relatedTo.FunctionToCall))
+                        relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall }/{Key}";
                     var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
                     ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown, Value = "" });
-                  
+
 
                 }
                 else
@@ -386,7 +387,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     else if (property.PropertyType == typeof(DateTime))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
                     else if (property.PropertyType == typeof(Boolean))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox , Valuebool=false });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false });
                     else if (property.PropertyType.IsEnum)
                     {
                         var list = FillEnum(property, displayName);
@@ -395,19 +396,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     else
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
 
-                   
+
                 }
 
             }
-            Task.WaitAll(); 
+            Task.WaitAll();
         }
 
 
         private async Task Clear()
         {
 
-          
-            await Init(); 
+
+            await Init();
 
 
 
@@ -415,12 +416,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
         private async Task<List<RelatedTo>> GetRelatedTo(RelatedToAttribute relatedTo, CancellationToken cancellationToken)
-        { 
+        {
             var entityName = relatedTo.Name.Replace("Dto", "");
             List<RelatedTo> relatedTos = new();
+
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
-
-
+ 
             var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
@@ -480,7 +481,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         }
         public string Name { get; set; }
-        public string Value { get; set; } = ""; 
+        public string Value { get; set; } = "";
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
@@ -488,8 +489,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public bool Valuebool { get; set; }
         public PropertyInfo property { get; set; }
         public int Order { get; set; }
-      
-       
+
+
 
     }
 

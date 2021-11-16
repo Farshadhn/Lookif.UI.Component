@@ -22,7 +22,7 @@ namespace Lookif.UI.Component.DropDown
         {
             SanitizedRecords = new Dictionary<string, string>();
             if (!Records.Any())
-                return;
+                return;   
             foreach (var Record in Records)
             {
 
@@ -36,7 +36,14 @@ namespace Lookif.UI.Component.DropDown
                 var DropDownValue = property.GetValue(Record, null).ToString();
                 if (!SanitizedRecords.ContainsKey(DropDownKey))
                     SanitizedRecords.Add(DropDownKey, DropDownValue);
+            } 
+            if (!string.IsNullOrEmpty(SelectedOption?.ToString()))
+            {
+                var s = SanitizedRecords.FirstOrDefault(x => x.Value == SelectedOption.ToString()); 
+                Selected = s.Key.ToString(); 
+
             }
+
         }
 
 
@@ -49,22 +56,30 @@ namespace Lookif.UI.Component.DropDown
 
         protected override async Task OnParametersSetAsync()
         {
-
             Bind();
 
-            if (SelectedOption is null)
-                return;
 
-
-            //SetIdFromName(SelectedOption);
             await base.OnParametersSetAsync();
 
         }
+
+
+        /// <summary>
+        /// When you select sth or type sth. we get this event
+        /// </summary>
+        /// <param name="changeEventArgs"></param>
+        /// <returns></returns>
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
         {
             var SelectedValue = changeEventArgs.Value.ToString();
 
             var (obj, IsItChanged) = SetIdFromName(SelectedValue);
+            if (string.IsNullOrEmpty(SelectedValue))
+            { 
+                Selected = "";
+                await ReturnValueChanged.InvokeAsync(default(T));
+                return;
+            }
             if (string.IsNullOrEmpty(obj.key) && string.IsNullOrEmpty(obj.value))
             {
 
@@ -74,10 +89,12 @@ namespace Lookif.UI.Component.DropDown
                 return;
 
             }
+
             if (IsItChanged)
             {
                 Selected = obj.key;
                 var finalRes = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
+
                 await ReturnValueChanged.InvokeAsync(finalRes);
             }
 
@@ -86,6 +103,7 @@ namespace Lookif.UI.Component.DropDown
 
         private ((string key, string value), bool IsItChanged) SetIdFromName(string key)
         {
+
             var res = new KeyValuePair<string, string>();
             if (key is not string)
                 res = SanitizedRecords.FirstOrDefault(x => x.Value.Trim() == key.Trim());
