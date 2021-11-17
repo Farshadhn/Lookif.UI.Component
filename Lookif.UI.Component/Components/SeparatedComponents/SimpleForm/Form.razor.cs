@@ -127,7 +127,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             var notificationHeaderText = String.Empty;
 
 
-            await Init();
 
             if (Key == default)
             {
@@ -145,13 +144,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 notificationHeaderText = basicResource["DoneAddingHeader"].Value;
             }
             else
-            { 
+            {
                 var responseMessage = await Http.PutAsJsonAsync($"{ModelName}/update/{Key}", insertOrUpdate);
                 notificationText = basicResource["DoneEditing"].Value;
                 notificationHeaderText = basicResource["DoneEditingHeader"].Value;
 
             }
-
+            ItemsOfClasses = new List<ItemsOfClass>();
+            await Task.Delay(200);
+            StateHasChanged();
+            await Init();
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
@@ -193,7 +195,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private async Task Edit(string id)
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
-            var response = await dataObj.Content.ReadAsStringAsync(); 
+            var response = await dataObj.Content.ReadAsStringAsync();
             var generic = typeof(ApiResult<>);
             Type constructed = generic.MakeGenericType(Dto);
             var res = DeserializeObject(response!, constructed);
@@ -369,7 +371,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var file = property.GetCustomAttribute<FileAttribute>();
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
-                {  
+                {
                     if (Key != default && !string.IsNullOrEmpty(relatedTo.FunctionToCall))
                         relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall }/{Key}";
                     var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
@@ -400,7 +402,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
 
             }
-            Task.WaitAll();
         }
 
 
@@ -421,7 +422,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             List<RelatedTo> relatedTos = new();
 
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? "Get" : relatedTo.FunctionToCall)}";
- 
+
             var res = await Http.GetAsync(sendToAddress, cancellationToken);
             if (!res.IsSuccessStatusCode)
                 throw new Exception("");
