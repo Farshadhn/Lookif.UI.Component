@@ -61,7 +61,7 @@
                 }
                 else if (item.Type is TypeOfInput.CheckBox)
                 {
-                    <input class="form-control" type="checkbox" @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
+                    <input class="form-control" type="checkbox" checked='@(item.Valuebool ?"checked":""))' @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
 
                 }
                 else if (item.Type is TypeOfInput.File)
