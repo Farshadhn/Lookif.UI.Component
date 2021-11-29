@@ -346,7 +346,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             }
 
         }
-
+        private bool CheckEligibilityToShow(HiddenDtoAttribute hiddenDtoAttribute, formStatus IsItInCreateMode)
+        {
+            if (hiddenDtoAttribute is null)
+                return true;
+            if (hiddenDtoAttribute.status == HiddenStatus.Edit && IsItInCreateMode == formStatus.Edit)
+                return false;
+            return true;
+        }
         private async Task Init()
         {
 
@@ -358,7 +365,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
 
-                if (!(hiddenDto is null)) // What we don't want to include in our form
+                if (!CheckEligibilityToShow(hiddenDto ,(Key != default) ? formStatus.Edit: formStatus.Create))  // What we don't want to include in our form
                     continue;
                 var key = property.GetCustomAttribute<KeyAttribute>();
                 if (!(key is null) || property.Name == "Id") continue;
