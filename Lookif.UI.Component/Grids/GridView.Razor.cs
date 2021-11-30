@@ -60,11 +60,13 @@ namespace Lookif.UI.Component.Grids
         public List<List<ValuePlaceHolder>> ConvertInputToListOfValuePlaceHolders(List<TSelectItem> records = null)
         {
 
-
+            Console.WriteLine("ConvertInputToListOfValuePlaceHolders");
             if (Records is not null)
             {
+                Console.WriteLine("ConvertInputToListOfValuePlaceHolders-Records");
                 if (records is null)
                     records = Records;
+                Console.WriteLine(SerializeObject(records));
                 ConvertedRecords = new List<List<ValuePlaceHolder>>();
                 foreach (var input in records)
                 {
