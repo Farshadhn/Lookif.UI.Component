@@ -28,24 +28,26 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         [Parameter]
         public IStringLocalizer Resource { get; set; }
         protected override async Task OnInitializedAsync()
-        { 
+        {
             await base.OnInitializedAsync();
             await Bind();
 
         }
         private async Task Bind(string inserted = default)
-        {  
-            var dataObj = await Http.GetFromJsonAsync<object>($"{ModelName}/Get");
-             
-            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(dataObj.ToString()!);
-             
+        {
+            var dataObj = await Http.GetAsync($"{ModelName}/Get");
+
+            var content = await dataObj.Content.ReadAsStringAsync();
+            
+            var data = DeserializeObject<ApiResult<List<TSelectItem>>>(content);
+
             Records = data.Data;
 
         }
 
 
         private async Task OnDeleteFinished(string Id)
-        { 
+        {
             await Bind();
         }
 

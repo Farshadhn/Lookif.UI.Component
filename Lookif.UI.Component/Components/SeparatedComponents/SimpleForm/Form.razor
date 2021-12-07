@@ -11,10 +11,10 @@
 
 }
 
-<div class="col-12 " style="max-height:90vh;overflow:auto">
+<div class="col-12 " style="max-height:90vh;min-height: 20vh;">
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
-        <div class="form-group col-lg-6 col-12 FormAlign" style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap; ">
+        <div class="form-group col-lg-6 col-12 FormAlign" style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap ">
 
             <label class="col-sm-4 col-form-label" style=" font-size: larger; font-weight: bolder;">
                 @{
@@ -50,9 +50,16 @@
                 {
                     <input class="form-control" @bind="item.Value" type="text" style="width: inherit;" />
                 }
-                else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
-                {
-                    <DropDownSelective SelectedOption="@item.Value" Records="@item.Collection" Key="Name" Value="Id" @bind-ReturnValue="item.Value"></DropDownSelective>
+                else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum or TypeOfInput.MultipleSelectedDropDown)
+                { 
+                    <DropDownSelective 
+                    Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)  
+                    SelectedOption="@item.ValueColection" 
+                    Records="@item.Collection" 
+                    Key="Name" 
+                    Value="Id"
+                    @bind-ReturnValue="item.ValueColection"
+                    ></DropDownSelective>
                 }
                 else if (item.Type is TypeOfInput.DateTime)
                 {

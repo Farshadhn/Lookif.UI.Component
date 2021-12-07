@@ -59,22 +59,19 @@ namespace Lookif.UI.Component.Grids
         /// <returns></returns>
         public List<List<ValuePlaceHolder>> ConvertInputToListOfValuePlaceHolders(List<TSelectItem> records = null)
         {
-
-            Console.WriteLine("ConvertInputToListOfValuePlaceHolders");
+             
             if (Records is not null)
-            {
-                Console.WriteLine("ConvertInputToListOfValuePlaceHolders-Records");
+            { 
                 if (records is null)
-                    records = Records;
-                Console.WriteLine(SerializeObject(records));
+                    records = Records; 
                 ConvertedRecords = new List<List<ValuePlaceHolder>>();
                 foreach (var input in records)
-                {
+                { 
                     var temp = new List<ValuePlaceHolder>();
                     foreach (var item in PropertyInformations)
                     {
                         try
-                        {
+                        { 
                             var vph = new ValuePlaceHolder();
                             var prop = input.GetType().GetProperty(item.PropertyName);
                             vph.ObjectName = item.PropertyName;
@@ -101,8 +98,7 @@ namespace Lookif.UI.Component.Grids
                             temp.Add(vph);
                         }
                         catch (Exception e)
-                        {
-
+                        { 
 
                         }
 

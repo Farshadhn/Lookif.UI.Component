@@ -174,6 +174,9 @@
   <data name="NoRecord" xml:space="preserve">
     <value>داده ای برای نمایش موجود نیست</value>
   </data>
+  <data name="Select" xml:space="preserve">
+    <value>لطفا از موارد زیر انتخاب کنید</value>
+  </data>
   <data name="Total" xml:space="preserve">
     <value>تعداد رکورد ها</value>
   </data>

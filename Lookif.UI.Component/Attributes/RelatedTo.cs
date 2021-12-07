@@ -7,8 +7,7 @@
         public string DisplayName;
         public double version;
         public string FunctionToCall;
-
-        public RelatedToAttribute(string name,string DisplayName ="Name",string functionToCall = "")
+        public RelatedToAttribute(string name, string DisplayName = "Name", string functionToCall = "")
         {
             this.DisplayName = DisplayName;
             FunctionToCall = functionToCall;

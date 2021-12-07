@@ -8,22 +8,22 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Blazored.Toast.Services;
 using Lookif.UI.Component.Attributes;
-using Lookif.UI.Component.Models;
 using Microsoft.AspNetCore.Components;
 using Lookif.UI.Common.Models;
 using static Newtonsoft.Json.JsonConvert;
 using Microsoft.Extensions.Localization;
-using System.Globalization;
 using System.ComponentModel;
 using System.Threading;
 using Blazored.Modal;
 using Blazored.Modal.Services;
 using Lookif.UI.Component.Modals;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using Lookif.Library.Common.CommonModels;
-using System.Dynamic;
+using System.Collections;
+using util =  Lookif.Library.Common.Utilities;
+using Lookif.Library.Common.Utilities;
+
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
     public static class TypeExtensions
@@ -73,6 +73,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task Add()
         {
+            await Task.Delay(1000);
             if (Key != default)
             {
                 var IsItReallyOkay = await Confirm();
@@ -94,6 +95,33 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var targetType = prop.PropertyType.IsNullableType()
                                   ? Nullable.GetUnderlyingType(prop.PropertyType)
                                   : prop.PropertyType;
+
+
+
+
+
+                if (item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown)
+                {
+                    Console.WriteLine(item.Name);
+                    Console.WriteLine(item.Type.ToString());
+                    Console.WriteLine(SerializeObject(item?.ValueColection));
+                    Console.WriteLine(targetType.Name);
+                    //Console.WriteLine(SerializeObject(targetType.GetGenericArguments()[0]));
+                    //ToDo Make it generic 
+
+                    var convertedValue = item.Type switch
+                    {
+                        TypeOfInput.DropDown =>
+                          TypeDescriptor.GetConverter(targetType).ConvertFrom(item.ValueColection.FirstOrDefault()),
+                        TypeOfInput.MultipleSelectedDropDown => GetList(item.ValueColection, targetType.GetGenericArguments()[0]),
+                        _ => throw new NotImplementedException()
+                    };
+
+                    prop.SetValue(insertOrUpdate, convertedValue, null);
+
+                    continue;
+                }
+
                 if (targetType == typeof(DateTime))
                 {
                     prop.SetValue(insertOrUpdate, item.DateTime, null);
@@ -102,16 +130,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
 
-                if (String.IsNullOrEmpty(item?.Value)) continue;
 
 
 
 
                 try
                 {
+                    if (string.IsNullOrEmpty(item?.Value)) continue;
                     var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
                     prop.SetValue(insertOrUpdate, convertedValue, null);
-
+                    continue;
                 }
                 catch (Exception ex)
                 {
@@ -125,9 +153,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             var returnStr = String.Empty;
             var notificationText = String.Empty;
             var notificationHeaderText = String.Empty;
-
-
-
+            Console.WriteLine(SerializeObject(insertOrUpdate));
+ 
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -157,6 +184,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
+        }
+
+        private object GetList(IEnumerable<object> valueColection, Type type)
+        {
+            //we need to convert everything
+            if (type == typeof(Guid))
+                return valueColection?.ToList().ConvertAll(x => Guid.Parse(x.ToString()));
+            return valueColection;
         }
 
         #endregion
@@ -195,7 +230,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private async Task Edit(string id)
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
+            
             var response = await dataObj.Content.ReadAsStringAsync();
+            Console.WriteLine("dataObj");
+            Console.WriteLine(response);
             var generic = typeof(ApiResult<>);
             Type constructed = generic.MakeGenericType(Dto);
             var res = DeserializeObject(response!, constructed);
@@ -209,7 +247,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             foreach (var item in ItemsOfClasses)
             {
                 PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
-
+                Console.WriteLine(SerializeObject(prop?.Name));
+                Console.WriteLine(SerializeObject(item?.Type));
+                 
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
@@ -218,6 +258,27 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else if (prop?.PropertyType == typeof(Boolean))
                 {
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
+                }
+                //else if (prop?.PropertyType.GetDirectInterfaces(true).Any(x => x == typeof(ICollection)) == true) 
+                else if (item.Type is  TypeOfInput.MultipleSelectedDropDown) 
+                {
+                   
+                    var desiredData = prop.GetValue(data, null)!;
+                    
+                    item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
+                     
+                    Console.WriteLine("item!.ValueColection");
+                    Console.WriteLine(SerializeObject(item!.ValueColection));
+                }
+                else if (item.Type is TypeOfInput.DropDown  )
+                {
+
+                    var desiredData = prop.GetValue(data, null)!;
+                     
+                    item!.ValueColection = new List<object>();
+                    item!.ValueColection.Add(desiredData);
+                    Console.WriteLine("item!.ValueColection");
+                    Console.WriteLine(SerializeObject(item!.ValueColection));
                 }
                 else
                 {
@@ -365,7 +426,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
 
-                if (!CheckEligibilityToShow(hiddenDto ,(Key != default) ? formStatus.Edit: formStatus.Create))  // What we don't want to include in our form
+                if (!CheckEligibilityToShow(hiddenDto, (Key != default) ? formStatus.Edit : formStatus.Create))  // What we don't want to include in our form
                     continue;
                 var key = property.GetCustomAttribute<KeyAttribute>();
                 if (!(key is null) || property.Name == "Id") continue;
@@ -379,10 +440,22 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
+
                     if (Key != default && !string.IsNullOrEmpty(relatedTo.FunctionToCall))
                         relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall }/{Key}";
                     var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
-                    ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Collection = list, Type = TypeOfInput.DropDown, Value = "" });
+                    ItemsOfClasses.Add(
+                        new ItemsOfClass(order)
+                        {
+                            Name = property.Name,
+                            DisplayName = displayName,
+                            Collection = list,
+                            Type =property.PropertyType.GetInterface(nameof(IEnumerable)) is not null ? TypeOfInput.MultipleSelectedDropDown : TypeOfInput.DropDown,
+                            Value = null,
+                            property = property,
+                        });
+
+
 
 
                 }
@@ -490,6 +563,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
         public string Name { get; set; }
         public string Value { get; set; } = "";
+        public List<object> ValueColection { get; set; } // This is for Dropdowns
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
@@ -515,7 +589,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
     /// </summary>
     public enum TypeOfInput
     {
-        Text, DropDown, DateTime, CheckBox, Enum, File
+        Text, DropDown, MultipleSelectedDropDown, DateTime, CheckBox, Enum, File
     }
 
 

@@ -1,9 +1,11 @@
 ﻿using Blazored.Toast.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Newtonsoft.Json.JsonConvert;
 
@@ -12,17 +14,24 @@ namespace Lookif.UI.Component.DropDown
 {
     public partial class DropDownSelective<T>
     {
-        private T returnValue;
+        private List<T> returnValue;
 
         [Inject] IToastService toastService { get; set; }
+        [Inject] IJSRuntime js { get; set; }
+
+        bool firstRender = true;
+
 
         #region ...Function...
 
         private void Bind()
         {
-            SanitizedRecords = new Dictionary<string, string>();
+            firstRender = false;
+            SanitizedRecords = new();
+            Console.WriteLine("SerializeObject(Records)");
+            Console.WriteLine(SerializeObject(Records));
             if (!Records.Any())
-                return;   
+                return;
             foreach (var Record in Records)
             {
 
@@ -30,18 +39,34 @@ namespace Lookif.UI.Component.DropDown
                 var targetObject = property.GetValue(Record, null);
                 if (targetObject is null)
                     continue;
-                var DropDownKey = targetObject.ToString();
+                var DropDownValue = targetObject.ToString();
 
                 property = Record.GetType().GetProperty(Value);
-                var DropDownValue = property.GetValue(Record, null).ToString();
-                if (!SanitizedRecords.ContainsKey(DropDownKey))
-                    SanitizedRecords.Add(DropDownKey, DropDownValue);
-            } 
-            if (!string.IsNullOrEmpty(SelectedOption?.ToString()))
-            {
-                var s = SanitizedRecords.FirstOrDefault(x => x.Value == SelectedOption.ToString()); 
-                Selected = s.Key.ToString(); 
+                var DropDownKey = (T)property.GetValue(Record, null);
+                if (!SanitizedRecords.Any(x => x.Key.Equals(DropDownKey)))
+                    SanitizedRecords.Add(new DropdownContextHolder<T>(DropDownValue, DropDownKey));
+            }
 
+
+            if (SelectedOption is not null && !SelectedOption.Equals(default(List<T>)))
+            {
+                if (Multiple)
+                {
+                    Console.WriteLine("Multiple");
+                    Console.WriteLine(SerializeObject(SelectedOption)); 
+                    SelectedOption.AsParallel().ForAll(x=>SetIdFromKey(x,false));
+                    Console.WriteLine("After  Multiple");
+                    Console.WriteLine(SerializeObject(SanitizedRecords));
+                   
+                }
+                else
+                {
+                    Console.WriteLine("SerializeObject(SelectedOption)");
+                    Console.WriteLine(SerializeObject(SelectedOption));
+                    SetIdFromKey(SelectedOption.FirstOrDefault(),false);
+                    Selected = SanitizedRecords.FirstOrDefault(x => x.Status).Content;
+                }
+                
             }
 
         }
@@ -52,14 +77,13 @@ namespace Lookif.UI.Component.DropDown
         #region ...Event...
 
 
-
-
-        protected override async Task OnParametersSetAsync()
+        protected override void OnParametersSet()
         {
-            Bind();
+            if (firstRender)
+            {
+                Bind();
+            }
 
-
-            await base.OnParametersSetAsync();
 
         }
 
@@ -72,57 +96,71 @@ namespace Lookif.UI.Component.DropDown
         public async Task myrecordsChange(ChangeEventArgs changeEventArgs)
         {
             var SelectedValue = changeEventArgs.Value.ToString();
-
-            var (obj, IsItChanged) = SetIdFromName(SelectedValue);
-            if (string.IsNullOrEmpty(SelectedValue))
-            { 
-                Selected = "";
-                await ReturnValueChanged.InvokeAsync(default(T));
-                return;
-            }
-            if (string.IsNullOrEmpty(obj.key) && string.IsNullOrEmpty(obj.value))
+            try
             {
-
-                changeEventArgs.Value = " ";
-                Selected = " ";
-                toastService.ShowError("لطفا مقدار صحیح را از داخل لیست انتخاب فرمایید.!", "خطا");
-                return;
-
+                SetIdFromName(SelectedValue);
+                var res = new List<T>
+                {
+                    SanitizedRecords.FirstOrDefault(x => x.Status).Key
+                };
+                Console.WriteLine(SerializeObject(SelectedValue));
+                Console.WriteLine(SerializeObject(res));
+                await ReturnValueChanged.InvokeAsync(res);
             }
-
-            if (IsItChanged)
+            catch (Exception)
             {
-                Selected = obj.key;
-                var finalRes = (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(obj.value);
-
-                await ReturnValueChanged.InvokeAsync(finalRes);
+                await ReturnValueChanged.InvokeAsync(default);
             }
+
+
+
+
 
         }
 
+        private async Task ChangeList(DropdownContextHolder<T> record)
+        {
+            await Task.Delay(10);
+            SetIdFromKey(record.Key,false);
+            await ReturnValueChanged.InvokeAsync(SanitizedRecords.Where(x => x.Status).Select(x => x.Key).ToList());
 
-        private ((string key, string value), bool IsItChanged) SetIdFromName(string key)
+        }
+
+        private void SetIdFromName(string Content, bool reset = true)
         {
 
-            var res = new KeyValuePair<string, string>();
-            if (key is not string)
-                res = SanitizedRecords.FirstOrDefault(x => x.Value.Trim() == key.Trim());
-            else
-                res = SanitizedRecords.FirstOrDefault(x => x.Key.Trim() == key.Trim());
+            var res = new DropdownContextHolder<T>();
+            if (reset)
+                SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
+            res =  SanitizedRecords.FirstOrDefault(x => x.Content.Trim() == Content.Trim());
+            if (res is null)
+                throw new Exception($@"{Content} not found");
+            res.Status = !res.Status;
 
-            return ((res.Value is not null) ? ((res.Key, res.Value), true) : (default, false));
+        }
+        private void SetIdFromKey(T key, bool reset = true)
+        {
+
+            var res = new DropdownContextHolder<T>();
+            if (reset)
+                SanitizedRecords.AsParallel().ForAll(x => x.Status = false); 
+            res =  SanitizedRecords.FirstOrDefault(x => x.Key.ToString() == key.ToString());
+             
+            if (res is null)
+                throw new Exception($@"{key} not found");
+            res.Status = !res.Status;
 
         }
         #endregion
 
         #region ...Definition...
 
-        private Dictionary<string, string> SanitizedRecords { get; set; } //At first we fetch all data after that we create Dictionary of all name and Ids
-        private Dictionary<string, string> FilteredRecords { get; set; }
+        private List<DropdownContextHolder<T>> SanitizedRecords { get; set; } //At first we fetch all data after that we create Dictionary of all name and Ids
+        private List<DropdownContextHolder<T>> FilteredRecords { get; set; }
         public int Count { get; set; } = 10;
         public bool Show { get; set; } = false;
         public string Text { get; set; } = "";
-        public string Selected { get; set; } = "";
+        public string Selected { get; set; } = ""; //Content
 
 
         #endregion
@@ -136,11 +174,12 @@ namespace Lookif.UI.Component.DropDown
         [Parameter] public string Value { get; set; }
 
         [Parameter]
-        public T SelectedOption { get; set; }
-
+        public List<T> SelectedOption { get; set; }
+        [Parameter]
+        public bool Multiple { get; set; }
 
         [Parameter]
-        public T ReturnValue
+        public List<T> ReturnValue
         {
             get => returnValue; set
             {
@@ -149,8 +188,31 @@ namespace Lookif.UI.Component.DropDown
             }
         }
         [Parameter]
-        public EventCallback<T> ReturnValueChanged { get; set; }
+        public EventCallback<List<T>> ReturnValueChanged { get; set; }
+
+
 
         #endregion
+    }
+
+    internal class DropdownContextHolder<T>
+    {
+
+        public DropdownContextHolder(string content, T key, bool status = false)
+        {
+            Content=content;
+            Key=key;
+            Status=status;
+        }
+
+        public DropdownContextHolder()
+        {
+
+        }
+        public string Content { get; init; }
+        public T Key { get; init; }
+        public bool Status { get; set; }
+
+
     }
 }

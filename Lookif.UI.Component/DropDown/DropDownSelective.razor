@@ -1,5 +1,14 @@
 ﻿@typeparam T
 @namespace Lookif.UI.Component.DropDown
+@using Microsoft.Extensions.Localization;
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
+@{
+    var relatedSource = ((IStringLocalizer)basicResource)?.GetAllStrings()?.ToList();
+
+}
+
+
 @{
     var id = Guid.NewGuid();
 
@@ -12,18 +21,67 @@
 }
 else
 {
-     
-
-    <input class="custom-select custom-select-sm" list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
-
-    <datalist style="width: 100%;" id="@id">
-        @foreach (var record in SanitizedRecords)
-        {
-            <option style="width: 100%;">@record.Key</option>
-        }
-    </datalist>
+    @code {
+    bool show = false;
+    private void ShowOptions()
+    {
+        show = !show;
+        Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(SanitizedRecords));
+    }
 
 
+    }
+    if (Multiple)
+    {
+
+        <div class="multiselect ">
+            <div class="selectBox" @onclick="ShowOptions">
+                <select>
+                    <option>@relatedSource.FirstOrDefault(x=>x.Name == "Select").Value</option>
+                </select>
+                <div class="overSelect"></div>
+            </div>
+
+            <div id="checkboxes" style='display:@((show)?"block":"none")'>
+                @foreach (var record in SanitizedRecords)
+                {
+
+                    <label>
+                        @{
+                            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(record));
+                            if (record.Status)
+                            {
+
+                                <input type="checkbox" checked @onclick="()=>ChangeList(record)" />
+
+                                @record.Content
+                            }
+                            else
+                            {
+                                 <input type="checkbox"  @onclick="()=>ChangeList(record)" />
+                                  @record.Content
+                            }
+                        }
+                    </label>
+                }
+
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <input class="custom-select custom-select-sm" list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
+
+        <datalist style="width: 100%;" id="@id">
+            @foreach (var record in SanitizedRecords)
+            {
+                <option style="width: 100%;">@record.Content</option>
+            }
+        </datalist>
+
+    }
 }
 
 
@@ -36,30 +94,3 @@ else
 
 
 
-
-
-
-<style>
-
-    .input-icons {
-        width: 100%;
-    }
-
-
-
-    .icon {
-        padding: 10px;
-        color: green;
-        min-width: 50px;
-        text-align: center;
-    }
-
-    .input-field {
-        width: 100%;
-        text-align: center;
-    }
-
-    h2 {
-        color: green;
-    }
-</style>
