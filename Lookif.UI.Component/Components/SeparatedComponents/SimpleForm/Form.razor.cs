@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using Lookif.Library.Common.CommonModels;
 using System.Collections;
-using util =  Lookif.Library.Common.Utilities;
+using util = Lookif.Library.Common.Utilities;
 using Lookif.Library.Common.Utilities;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
@@ -100,13 +100,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
 
-                if (item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown)
+                if ((item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown ) && (item.ValueColection is not null && item.ValueColection.Any()))
                 {
-                    Console.WriteLine(item.Name);
-                    Console.WriteLine(item.Type.ToString());
-                    Console.WriteLine(SerializeObject(item?.ValueColection));
-                    Console.WriteLine(targetType.Name);
-                    //Console.WriteLine(SerializeObject(targetType.GetGenericArguments()[0]));
+                     
                     //ToDo Make it generic 
 
                     var convertedValue = item.Type switch
@@ -154,7 +150,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             var notificationText = String.Empty;
             var notificationHeaderText = String.Empty;
             Console.WriteLine(SerializeObject(insertOrUpdate));
- 
+
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -230,7 +226,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private async Task Edit(string id)
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
-            
+
             var response = await dataObj.Content.ReadAsStringAsync();
             Console.WriteLine("dataObj");
             Console.WriteLine(response);
@@ -249,7 +245,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
                 Console.WriteLine(SerializeObject(prop?.Name));
                 Console.WriteLine(SerializeObject(item?.Type));
-                 
+
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
@@ -257,24 +253,25 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
                 else if (prop?.PropertyType == typeof(Boolean))
                 {
+                    Console.WriteLine(prop.GetValue(data, null));
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
                 }
                 //else if (prop?.PropertyType.GetDirectInterfaces(true).Any(x => x == typeof(ICollection)) == true) 
-                else if (item.Type is  TypeOfInput.MultipleSelectedDropDown) 
-                {
-                   
-                    var desiredData = prop.GetValue(data, null)!;
-                    
-                    item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
-                     
-                    Console.WriteLine("item!.ValueColection");
-                    Console.WriteLine(SerializeObject(item!.ValueColection));
-                }
-                else if (item.Type is TypeOfInput.DropDown  )
+                else if (item.Type is  TypeOfInput.MultipleSelectedDropDown)
                 {
 
                     var desiredData = prop.GetValue(data, null)!;
-                     
+
+                    item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
+
+                    Console.WriteLine("item!.ValueColection");
+                    Console.WriteLine(SerializeObject(item!.ValueColection));
+                }
+                else if (item.Type is TypeOfInput.DropDown)
+                {
+
+                    var desiredData = prop.GetValue(data, null)!;
+
                     item!.ValueColection = new List<object>();
                     item!.ValueColection.Add(desiredData);
                     Console.WriteLine("item!.ValueColection");
@@ -409,11 +406,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
         private bool CheckEligibilityToShow(HiddenDtoAttribute hiddenDtoAttribute, formStatus IsItInCreateMode)
         {
+            Console.WriteLine("CheckEligibilityToShow");
+            Console.WriteLine(IsItInCreateMode.ToString());
             if (hiddenDtoAttribute is null)
                 return true;
-            if (hiddenDtoAttribute.status == HiddenStatus.Edit && IsItInCreateMode == formStatus.Edit)
-                return false;
-            return true;
+
+            Console.WriteLine(hiddenDtoAttribute.ToString());
+            Console.WriteLine(IsItInCreateMode.ToString());
+            return (hiddenDtoAttribute.status, IsItInCreateMode) switch
+            {
+                (HiddenStatus.Edit, formStatus.Edit) =>false,
+                (HiddenStatus.Create, formStatus.Create) =>false,
+                _ => true
+            };  
         }
         private async Task Init()
         {

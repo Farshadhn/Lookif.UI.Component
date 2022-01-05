@@ -16,7 +16,7 @@
 @if (SanitizedRecords == null)
 {
     <p>
-        <em>در حال دریافت اطلاعات</em>
+        <em>لیستی موجود نیست</em>
     </p>
 }
 else
@@ -25,8 +25,7 @@ else
     bool show = false;
     private void ShowOptions()
     {
-        show = !show;
-        Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(SanitizedRecords));
+        show = !show; 
     }
 
 
@@ -71,10 +70,19 @@ else
         </div>
     }
     else
-    {
-        <input class="custom-select custom-select-sm" list="@id" name="@(Guid.NewGuid()) " value="@Selected" @onchange="@(myrecordsChange)" style="width: inherit;" />
+    { 
+        <input  
+        class="custom-select custom-select-sm" 
+        list="@id"  
+        @onfocus="Clear"
+        name="@(Guid.NewGuid())"
+        value="@Selected" 
+         
+        @attributes="AdditionalAttributes"
+        @onchange="@(myrecordsChange)" 
+        style="width: inherit;" />
 
-        <datalist style="width: 100%;" id="@id">
+        <datalist style="width: 100%;" id="@id"> 
             @foreach (var record in SanitizedRecords)
             {
                 <option style="width: 100%;">@record.Content</option>
