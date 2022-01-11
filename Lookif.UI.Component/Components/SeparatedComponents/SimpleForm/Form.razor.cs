@@ -148,8 +148,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             }
             var returnStr = String.Empty;
             var notificationText = String.Empty;
-            var notificationHeaderText = String.Empty;
-            Console.WriteLine(SerializeObject(insertOrUpdate));
+            var notificationHeaderText = String.Empty; 
 
             if (Key == default)
             {
@@ -227,9 +226,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
 
-            var response = await dataObj.Content.ReadAsStringAsync();
-            Console.WriteLine("dataObj");
-            Console.WriteLine(response);
+            var response = await dataObj.Content.ReadAsStringAsync(); 
             var generic = typeof(ApiResult<>);
             Type constructed = generic.MakeGenericType(Dto);
             var res = DeserializeObject(response!, constructed);
@@ -242,18 +239,14 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             foreach (var item in ItemsOfClasses)
             {
-                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
-                Console.WriteLine(SerializeObject(prop?.Name));
-                Console.WriteLine(SerializeObject(item?.Type));
-
+                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance); 
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
 
                 }
                 else if (prop?.PropertyType == typeof(Boolean))
-                {
-                    Console.WriteLine(prop.GetValue(data, null));
+                { 
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
                 }
                 //else if (prop?.PropertyType.GetDirectInterfaces(true).Any(x => x == typeof(ICollection)) == true) 
@@ -263,9 +256,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     var desiredData = prop.GetValue(data, null)!;
 
                     item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
-
-                    Console.WriteLine("item!.ValueColection");
-                    Console.WriteLine(SerializeObject(item!.ValueColection));
+                     
                 }
                 else if (item.Type is TypeOfInput.DropDown)
                 {
@@ -273,9 +264,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     var desiredData = prop.GetValue(data, null)!;
 
                     item!.ValueColection = new List<object>();
-                    item!.ValueColection.Add(desiredData);
-                    Console.WriteLine("item!.ValueColection");
-                    Console.WriteLine(SerializeObject(item!.ValueColection));
+                    item!.ValueColection.Add(desiredData); 
                 }
                 else
                 {
@@ -404,19 +393,17 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             }
 
         }
-        private bool CheckEligibilityToShow(HiddenDtoAttribute hiddenDtoAttribute, formStatus IsItInCreateMode)
-        {
-            Console.WriteLine("CheckEligibilityToShow");
-            Console.WriteLine(IsItInCreateMode.ToString());
+        private bool CheckEligibilityToShow(HiddenDtoAttribute hiddenDtoAttribute, formStatus formStatus)
+        { 
             if (hiddenDtoAttribute is null)
                 return true;
 
-            Console.WriteLine(hiddenDtoAttribute.ToString());
-            Console.WriteLine(IsItInCreateMode.ToString());
-            return (hiddenDtoAttribute.status, IsItInCreateMode) switch
+            return (hiddenDtoAttribute.status, formStatus) switch
             {
                 (HiddenStatus.Edit, formStatus.Edit) =>false,
                 (HiddenStatus.Create, formStatus.Create) =>false,
+                (HiddenStatus.EditAndCreate, formStatus.Edit ) => false,
+                (HiddenStatus.EditAndCreate, formStatus.Create ) => false,
                 _ => true
             };  
         }
@@ -430,12 +417,11 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             foreach (var property in propertyInfos)
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
-
+                
                 if (!CheckEligibilityToShow(hiddenDto, (Key != default) ? formStatus.Edit : formStatus.Create))  // What we don't want to include in our form
                     continue;
-                var key = property.GetCustomAttribute<KeyAttribute>();
-                if (!(key is null) || property.Name == "Id") continue;
-
+                var key = property.GetCustomAttribute<KeyAttribute>(); 
+                if (key is not null || property.Name == "Id") continue; 
 
                 var displayName = property.GetCustomAttribute<DisplayAttribute>()?.Name;//Name that should be placed as its label
 

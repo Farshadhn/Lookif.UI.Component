@@ -64,15 +64,15 @@ else
 
     <table class="table table-hover table-responsive">
         <thead>
-            <tr style="background-color: gainsboro;">
-                <th style="font-style:inherit">@basicResource["Filter"]</th>
+            <tr  style="background-color: gainsboro;">
+                <th  style="font-style:inherit">@basicResource["Filter"]</th>
                 @{ foreach (var item in PropertyInformations)
                     {
                         if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
                             continue;
                         //text - align - last: center;
-                        <th style=" min-width: 15vw;">
-                            <span style="vertical-align: middle;font-size:larger;">
+                        <th style=" min-width: 5vw;">
+                            <span  class="LH" style="vertical-align: middle;">
                                 @{ if (relatedSource is null) // When there is no source file
                                     {
                                         if (@item.Displayname is null) // when there is no displayName
@@ -100,7 +100,7 @@ else
                                     <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
                                 </div>*@
                             <div>
-                                <input type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
+                                <input class="LH" type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
                             </div>
                         </th>
  } }
@@ -147,7 +147,7 @@ else
                             if (item.ObjectName != "Id")
                             {
 
-                                <td style="vertical-align: middle;font-size: large;font-weight: 100">
+                                <td  class="LH" style="vertical-align: middle;" align="justify" >
                                     @item.ObjectValue
                                 </td>
                             }

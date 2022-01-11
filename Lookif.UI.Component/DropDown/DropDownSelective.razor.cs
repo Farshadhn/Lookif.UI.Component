@@ -66,8 +66,7 @@ namespace Lookif.UI.Component.DropDown
                 var DropDownKey = (T)property.GetValue(Record, null);
                 if (!SanitizedRecords.Any(x => x.Key.Equals(DropDownKey)))
                     SanitizedRecords.Add(new DropdownContextHolder<T>(DropDownValue, DropDownKey));
-            }
-
+            } 
         }
 
         private void Bind()
@@ -101,7 +100,7 @@ namespace Lookif.UI.Component.DropDown
         private void DefineInSingleChoice(List<T> seletedOptions)
         {
             SetIdFromKey(seletedOptions.FirstOrDefault(), false);
-            Selected = SanitizedRecords.FirstOrDefault(x => x.Status).Content;
+            Selected = SanitizedRecords?.FirstOrDefault(x => x.Status)?.Content;
         }
 
         private void DefineInMultipleChoice(List<T> seletedOptions)
@@ -139,9 +138,8 @@ namespace Lookif.UI.Component.DropDown
             try
             {
                 var SelectedValue = changeEventArgs.Value.ToString();
-                Selected = SelectedValue;
-
-                SetIdFromName(SelectedValue);
+                Selected = SelectedValue; 
+                SetIdFromName(SelectedValue); 
                 var res = new List<T>
                 {
                     SanitizedRecords.FirstOrDefault(x => x.Status).Key
@@ -182,7 +180,10 @@ namespace Lookif.UI.Component.DropDown
         }
         private void SetIdFromKey(T key, bool reset = true)
         {
-
+            if (key is null)
+                return;
+            if (key.Equals(default(T)))
+                return;
             var res = new DropdownContextHolder<T>();
             if (reset)
                 SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
@@ -219,6 +220,8 @@ namespace Lookif.UI.Component.DropDown
         public List<T> SelectedOption { get; set; }
         [Parameter]
         public bool Multiple { get; set; }
+        [Parameter]
+        public bool Simple { get; set; } = true;
 
         [Parameter]
         public List<T> ReturnValue

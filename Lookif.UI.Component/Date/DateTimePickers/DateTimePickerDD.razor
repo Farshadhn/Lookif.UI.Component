@@ -3,20 +3,20 @@
 @namespace Lookif.UI.Component.Date.DateTimePickers
 
 
-<select @bind="SelectedDay">
+<select @bind="SelectedDay" class="w-100" style="max-width:100px">
 
     @for (int i = 1; i <= CurrentCulture.Calendar.GetDaysInMonth(SelectedYear, SelectedMonth); i++)
     {
         <option value=@i>@i</option>
     }
 </select>
-<select @bind="SelectedMonth">
+<select @bind="SelectedMonth" class="w-100" style="max-width:100px">
     @foreach (var month in MonthNames)
     {
         <option value=@(month.RowNumber + 1)>@month.Name</option>
     }
 </select>
-<select @bind="SelectedYear">
+<select @bind="SelectedYear" class="w-100" style="max-width:100px">
     @{int year = CurrentCulture.Calendar.GetYear(DateTime.Now);
         for (int i = @year - 100; i <= @year+100; i++)
         {
