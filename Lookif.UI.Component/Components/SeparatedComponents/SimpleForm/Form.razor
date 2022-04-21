@@ -5,25 +5,26 @@
 
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.Localization;
+
 @inject IStringLocalizer<Resource> basicResource
 @{
     relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
 
 }
-<!--
-
-Define LH class in your css file, to style from
-
-
-
--->
-<div class="col-12 d-inline-block" >
+<style>
+.required:after {
+    content: " *";
+    color: red;
+}
+</style>
+<div class="col-12 d-inline-block">
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
         <div class="form-group col-lg-3   FormAlign LH" style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap ">
 
-            <label class="col-5 col-form-label" style=" font-size: inherit; font-weight: bolder;">
+            <label class='col-5 col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder; '>
                 @{
+
                     if (relatedSource is null) // When there is no source file
                     {
                         if (@item.DisplayName is null) // when there is no displayName
@@ -52,20 +53,19 @@ Define LH class in your css file, to style from
 
             </label>
             <div class="col-7">
+
                 @if (item.Type is TypeOfInput.Text)
                 {
-                    <input class="form-control LH" @bind="item.Value" type="text" style="width: inherit;" />
+                    <input class="form-control LH " @bind="item.Value" type="text" style="width: inherit;" />
                 }
                 else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum or TypeOfInput.MultipleSelectedDropDown)
-                { 
-                    <DropDownSelective 
-                    Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)  
-                    SelectedOption="@item.ValueColection" 
-                    Records="@item.Collection" 
-                    Key="Id" 
-                    Value="Name"
-                    @bind-ReturnValue="item.ValueColection"
-                    ></DropDownSelective>
+                {
+                    <DropDownSelective Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)
+                               SelectedOption="@item.ValueColection"
+                               Records="@item.Collection"
+                               Key="Id"
+                               Value="Name"
+                               @bind-ReturnValue="item.ValueColection"></DropDownSelective>
                 }
                 else if (item.Type is TypeOfInput.DateTime)
                 {
@@ -76,7 +76,7 @@ Define LH class in your css file, to style from
                 {
                     if (item.Valuebool)
                     {
-                        <input  class="form-control LH" type="checkbox" checked @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
+                        <input class="form-control LH" type="checkbox" checked @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
                     }
                     else
                     {
@@ -95,8 +95,8 @@ Define LH class in your css file, to style from
 
 
 
-</div> 
+</div>
 <div class="col-12">
     <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width:170px" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
     <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width: 170px " @onclick="Clear">@basicResource["Clear"]</button>
-</div>
+</div> 

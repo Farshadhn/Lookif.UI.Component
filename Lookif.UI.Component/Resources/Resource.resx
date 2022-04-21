@@ -165,6 +165,9 @@
   <data name="InputErrorHeader" xml:space="preserve">
     <value>Error</value>
   </data>
+  <data name="InputRequireError" xml:space="preserve">
+    <value>{field} is required</value>
+  </data>
   <data name="Insert" xml:space="preserve">
     <value>Insert</value>
   </data>

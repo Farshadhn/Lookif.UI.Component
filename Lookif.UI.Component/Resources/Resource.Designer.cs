@@ -205,6 +205,15 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {field} is required.
+        /// </summary>
+        internal static string InputRequireError {
+            get {
+                return ResourceManager.GetString("InputRequireError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insert.
         /// </summary>
         internal static string Insert {

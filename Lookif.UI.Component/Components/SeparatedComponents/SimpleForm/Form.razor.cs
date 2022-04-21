@@ -35,7 +35,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
     }
     public partial class Form
-
     {
 
 
@@ -73,7 +72,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <returns></returns>
         private async Task Add()
         {
-            await Task.Delay(1000);
+            //await Task.Delay(1000);
             if (Key != default)
             {
                 var IsItReallyOkay = await Confirm();
@@ -141,15 +140,29 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
                     var error = basicResource["InputError"].Value;
-                    toastService.ShowError($"{error}:  -'{rs}'-", basicResource["InputErrorHeader"].Value);
+                    toastService.ShowError($"{error} :  -'{rs}'-", basicResource["InputErrorHeader"].Value);
                     return;
                 }
 
             }
             var returnStr = String.Empty;
             var notificationText = String.Empty;
-            var notificationHeaderText = String.Empty; 
-
+            var notificationHeaderText = String.Empty;
+            //Check required
+            foreach (var item in ItemsOfClasses.Where(x => x.Required))
+            {
+                var value = insertOrUpdate.GetPropValue(item.Name);
+                if (value == default)
+                {
+                    var error = basicResource["InputError"].Value;
+                    var errorDetail = basicResource["InputRequireError"].Value;
+               
+                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
+                    errorDetail = errorDetail.Replace("{field}", name);
+                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    return;
+                }
+            } 
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -428,7 +441,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var relatedTo = property.GetCustomAttribute<RelatedToAttribute>();// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
                 var file = property.GetCustomAttribute<FileAttribute>();
-
+                var required = property.GetCustomAttribute<RequiredAttribute>() is null ? false : true ;
+                 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
 
@@ -444,6 +458,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                             Type =property.PropertyType.GetInterface(nameof(IEnumerable)) is not null ? TypeOfInput.MultipleSelectedDropDown : TypeOfInput.DropDown,
                             Value = null,
                             property = property,
+                            Required = required
                         });
 
 
@@ -453,21 +468,21 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else
                 {
                     if (file is not null)
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property,Required = required });
 
                     else if (property.PropertyType == typeof(String))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
                     else if (property.PropertyType == typeof(DateTime))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required });
                     else if (property.PropertyType == typeof(Boolean))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false, Required = required });
                     else if (property.PropertyType.IsEnum)
                     {
                         var list = FillEnum(property, displayName);
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list, Required = required });
                     }
                     else
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
 
 
                 }
@@ -562,7 +577,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public bool Valuebool { get; set; }
         public PropertyInfo property { get; set; }
         public int Order { get; set; }
-
+        public bool Required { get; set; }
 
 
     }

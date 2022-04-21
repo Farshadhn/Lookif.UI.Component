@@ -17,9 +17,9 @@ Blazored.Modal and Blazored.Toast are used in this project.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
-    <AssemblyVersion>1.2.15</AssemblyVersion>
-    <FileVersion>1.2.15</FileVersion>
-    <Version>1.2.15</Version>
+    <AssemblyVersion>1.2.16</AssemblyVersion>
+    <FileVersion>1.2.16</FileVersion>
+    <Version>1.2.16</Version>
   </PropertyGroup>
 
   
