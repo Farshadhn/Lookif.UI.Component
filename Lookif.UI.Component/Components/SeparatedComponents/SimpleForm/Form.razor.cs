@@ -212,6 +212,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private string ModelName => Dto.Name.Replace("Dto", "");
 
         public List<ItemsOfClass> ItemsOfClasses { get; set; } = new List<ItemsOfClass>();
+        public int CountOfItemsOfClasses { get; set; } = 1;
 
 
 
@@ -472,7 +473,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                     else if (property.PropertyType == typeof(String))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
-                    else if (property.PropertyType == typeof(DateTime))
+                    else if (property.PropertyType == typeof(DateTime) ||  property.PropertyType == typeof(DateTime?))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required });
                     else if (property.PropertyType == typeof(Boolean))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false, Required = required });
@@ -488,6 +489,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
 
             }
+            CountOfItemsOfClasses = ItemsOfClasses.Count;
         }
 
 

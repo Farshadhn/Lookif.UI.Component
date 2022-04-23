@@ -64,46 +64,54 @@ else
 
     <table class="table table-hover table-responsive">
         <thead>
-            <tr  style="background-color: gainsboro;">
-                <th  style="font-style:inherit">@basicResource["Filter"]</th>
-                @{ foreach (var item in PropertyInformations)
+            <tr style="background-color: gainsboro;">
+                <th style="font-style:inherit">@basicResource["Filter"]</th>
+                @{
+                    foreach (var item in PropertyInformations)
                     {
                         if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
                             continue;
                         //text - align - last: center;
                         <th style=" min-width: 5vw;">
-                            <span  class="LH" style="vertical-align: middle;">
-                                @{ if (relatedSource is null) // When there is no source file
+                            <span class="LH" style="vertical-align: middle;">
+                                @{
+                                    if (relatedSource is null) // When there is no source file
                                     {
                                         if (@item.Displayname is null) // when there is no displayName
                                         {
-                                            @item.PropertyName }
+                                            @item.PropertyName
+                                        }
                                         else
                                         {
-                                            @item.Displayname }
+                                            @item.Displayname
+                                        }
                                     }
                                     else
                                     {
                                         var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
                                         if (value == "")
                                         {
-                                            @item.PropertyName }
+                                            @item.PropertyName
+                                        }
                                         else
                                         {
-                                            @value }
+                                            @value
+                                        }
 
-                                    } }
+                                    }
+                                }
 
                             </span>
                             @*<div>
-                                    <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
-                                    <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
+                                <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
+                                <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
                                 </div>*@
                             <div>
                                 <input class="LH" type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
                             </div>
                         </th>
- } }
+                    }
+                }
 
 
             </tr>
@@ -115,15 +123,15 @@ else
                     <p>@basicResource["NoRecord"]</p>
                 </td>
             </tr>
- }
+        }
         else
         {
             @foreach (var record in PagedRecords)
             {
 
-                <tr >
+                <tr>
 
-                    @{ 
+                    @{
                         var Id = record.FirstOrDefault(x => x.ObjectName == "Id").ObjectValue;
                         <td>
 
@@ -147,15 +155,16 @@ else
                             if (item.ObjectName != "Id")
                             {
 
-                                <td  class="LH" style="vertical-align: middle;" align="justify" >
-                                    @item.ObjectValue
+                                <td class="LH" style="vertical-align: middle;" align="justify">
+                                     
+                                    @(DateTime.TryParse(@item.ObjectValue,out DateTime date)?(date == DateTime.MinValue?"-": date.Date.ToString("yyyy/MM/dd")):@item.ObjectValue)
                                 </td>
                             }
                         }
 
                     }
                 </tr>
-}}
+            }   }
     </table>
 
     <div class="row">

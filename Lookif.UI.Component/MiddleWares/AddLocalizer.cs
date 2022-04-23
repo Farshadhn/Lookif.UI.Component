@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Lookif.UI.Component.Utility;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Lookif.UI.Component.MiddleWares
@@ -33,18 +35,24 @@ namespace Lookif.UI.Component.MiddleWares
             var cultureFromLocalStorage = await localStorage.GetItemAsync<string>("culture");
 
             CultureInfo culture;
-
+            Console.Write("sss");
+            Console.Write(cultureFromLocalStorage);
             if (cultureFromLocalStorage != null)
             {
-                culture = new CultureInfo(cultureFromLocalStorage);
+                if (cultureFromLocalStorage == "fa-IR")
+                    culture = PersianCulture.GetPersianCulture();
+                else
+                    culture = new CultureInfo(cultureFromLocalStorage);
             }
             else
             {
-                culture = new CultureInfo("fa-IR");
+                //PersianCulture.GetPersianCulture();
+                culture = PersianCulture.GetPersianCulture();
             }
 
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
         }
     }
 }

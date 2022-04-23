@@ -18,14 +18,14 @@
 }
 </style>
 <div class="col-12 d-inline-block">
+   
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
-        <div class="form-group col-lg-3   FormAlign LH" style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap ">
+        <div class='form-group col-@(CountOfItemsOfClasses > 8 ?"3":"4") FormAlign LH' style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap" >
 
-            <label class='col-5 col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder; '>
-                @{
-
-                    if (relatedSource is null) // When there is no source file
+            <label class='col-4 col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder;' >
+                    
+                @if (relatedSource is null) // When there is no source file
                     {
                         if (@item.DisplayName is null) // when there is no displayName
                         {
@@ -49,10 +49,9 @@
                         }
 
                     }
-                }
 
             </label>
-            <div class="col-7">
+            <div class="col-@(CountOfItemsOfClasses > 8 ?"8":"7")">
 
                 @if (item.Type is TypeOfInput.Text)
                 {
