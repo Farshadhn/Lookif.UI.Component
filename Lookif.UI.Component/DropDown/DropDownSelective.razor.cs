@@ -26,7 +26,13 @@ namespace Lookif.UI.Component.DropDown
         bool firstRender = true;
 
         #region ...Function...
-
+        public async Task Refresh()
+        {
+            await Task.Delay(100);
+            await Clear();
+            StateHasChanged();
+            await Task.Delay(100);
+        }
         public async Task Clear()
         {
             resetAll();
