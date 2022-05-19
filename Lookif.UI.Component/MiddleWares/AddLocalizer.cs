@@ -35,8 +35,6 @@ namespace Lookif.UI.Component.MiddleWares
             var cultureFromLocalStorage = await localStorage.GetItemAsync<string>("culture");
 
             CultureInfo culture;
-            Console.Write("sss");
-            Console.Write(cultureFromLocalStorage);
             if (cultureFromLocalStorage != null)
             {
                 if (cultureFromLocalStorage == "fa-IR")

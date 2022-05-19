@@ -17,6 +17,7 @@ namespace Lookif.UI.Component.DropDown
         [Parameter(CaptureUnmatchedValues = true)]
         public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; }
 
+        [Parameter] public EventCallback<T> OnChange { get; set; }
 
         private List<T> returnValue;
 
@@ -26,15 +27,10 @@ namespace Lookif.UI.Component.DropDown
         bool firstRender = true;
 
         #region ...Function...
-        public async Task Refresh()
-        {
-            await Task.Delay(100);
-            await Clear();
-            StateHasChanged();
-            await Task.Delay(100);
-        }
+
         public async Task Clear()
         {
+
             resetAll();
             Selected = null;
             await ReturnValueChanged.InvokeAsync(default);
@@ -50,7 +46,7 @@ namespace Lookif.UI.Component.DropDown
 
         public void ReSelect(List<T> seletedOptions)
         {
-            if(seletedOptions is null or { Count: < 1})
+            if (seletedOptions is null or { Count: < 1 })
                 throw new ArgumentNullException(nameof(seletedOptions));
             ShowAlreadySelectedOptions(seletedOptions);
         }
@@ -72,14 +68,14 @@ namespace Lookif.UI.Component.DropDown
                 var DropDownKey = (T)property.GetValue(Record, null);
                 if (!SanitizedRecords.Any(x => x.Key.Equals(DropDownKey)))
                     SanitizedRecords.Add(new DropdownContextHolder<T>(DropDownValue, DropDownKey));
-            } 
+            }
         }
 
         private void Bind()
         {
             firstRender = false;
 
-            if (Records is null or { Count:<1 })
+            if (Records is null or { Count: < 1 })
                 return;
 
 
@@ -144,12 +140,14 @@ namespace Lookif.UI.Component.DropDown
             try
             {
                 var SelectedValue = changeEventArgs.Value.ToString();
-                Selected = SelectedValue; 
-                SetIdFromName(SelectedValue); 
+                Selected = SelectedValue;
+                SetIdFromName(SelectedValue);
                 var res = new List<T>
                 {
                     SanitizedRecords.FirstOrDefault(x => x.Status).Key
                 };
+
+                await OnChange.InvokeAsync(res.FirstOrDefault());
                 await ReturnValueChanged.InvokeAsync(res);
             }
             catch (Exception)
@@ -178,7 +176,7 @@ namespace Lookif.UI.Component.DropDown
             var res = new DropdownContextHolder<T>();
             if (reset)
                 SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
-            res =  SanitizedRecords.FirstOrDefault(x => x.Content.Trim() == Content.Trim());
+            res = SanitizedRecords.FirstOrDefault(x => x.Content.Trim() == Content.Trim());
             if (res is null)
                 throw new Exception($@"{Content} not found");
             res.Status = !res.Status;
@@ -193,7 +191,7 @@ namespace Lookif.UI.Component.DropDown
             var res = new DropdownContextHolder<T>();
             if (reset)
                 SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
-            res =  SanitizedRecords.FirstOrDefault(x => x.Key.ToString() == key.ToString());
+            res = SanitizedRecords.FirstOrDefault(x => x.Key.ToString() == key.ToString());
 
             if (res is null)
                 throw new Exception($@"{key} not found");
@@ -251,9 +249,9 @@ namespace Lookif.UI.Component.DropDown
 
         public DropdownContextHolder(string content, T key, bool status = false)
         {
-            Content=content;
-            Key=key;
-            Status=status;
+            Content = content;
+            Key = key;
+            Status = status;
         }
 
         public DropdownContextHolder()
