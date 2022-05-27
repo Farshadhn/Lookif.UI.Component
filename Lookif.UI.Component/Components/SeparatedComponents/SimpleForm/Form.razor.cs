@@ -65,7 +65,25 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
 
+        private bool CheckRequiedItems(object insertOrUpdate)
+        {
+            //Check required
+            foreach (var item in ItemsOfClasses.Where(x => x.Required))
+            {
+                var value = insertOrUpdate.GetPropValue(item.Name);
+                if (value == default)
+                {
+                    var error = basicResource["InputError"].Value;
+                    var errorDetail = basicResource["InputRequireError"].Value;
 
+                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
+                    errorDetail = errorDetail.Replace("{field}", name);
+                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    return false;
+                }
+            }
+            return true;
+        }
         /// <summary>
         /// Add Or Create New
         /// </summary>  
@@ -83,86 +101,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             object insertOrUpdate = Activator.CreateInstance(Dto);
 
-            foreach (var item in ItemsOfClasses)
-            {
-                var prop = insertOrUpdate.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
-                if (null == prop || !prop.CanWrite) continue;
-
-
-
-
-                var targetType = prop.PropertyType.IsNullableType()
-                                  ? Nullable.GetUnderlyingType(prop.PropertyType)
-                                  : prop.PropertyType;
-
-
-
-
-
-                if ((item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown ) && (item.ValueColection is not null && item.ValueColection.Any()))
-                {
-                     
-                    //ToDo Make it generic 
-
-                    var convertedValue = item.Type switch
-                    {
-                        TypeOfInput.DropDown =>
-                          TypeDescriptor.GetConverter(targetType).ConvertFrom(item.ValueColection.FirstOrDefault()),
-                        TypeOfInput.MultipleSelectedDropDown => GetList(item.ValueColection, targetType.GetGenericArguments()[0]),
-                        _ => throw new NotImplementedException()
-                    };
-
-                    prop.SetValue(insertOrUpdate, convertedValue, null);
-
-                    continue;
-                }
-
-                if (targetType == typeof(DateTime))
-                {
-                    prop.SetValue(insertOrUpdate, item.DateTime, null);
-                    continue;
-                }
-
-
-
-
-
-
-
-                try
-                {
-                    if (string.IsNullOrEmpty(item?.Value)) continue;
-                    var convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
-                    prop.SetValue(insertOrUpdate, convertedValue, null);
-                    continue;
-                }
-                catch (Exception ex)
-                {
-                    var rs = relatedSource.Find(x => x.Name == prop.Name);
-                    var error = basicResource["InputError"].Value;
-                    toastService.ShowError($"{error} :  -'{rs}'-", basicResource["InputErrorHeader"].Value);
-                    return;
-                }
-
-            }
+            ConvertWholeObject(ref insertOrUpdate);
             var returnStr = String.Empty;
-            var notificationText = String.Empty;
-            var notificationHeaderText = String.Empty;
-            //Check required
-            foreach (var item in ItemsOfClasses.Where(x => x.Required))
-            {
-                var value = insertOrUpdate.GetPropValue(item.Name);
-                if (value == default)
-                {
-                    var error = basicResource["InputError"].Value;
-                    var errorDetail = basicResource["InputRequireError"].Value;
-               
-                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
-                    errorDetail = errorDetail.Replace("{field}", name);
-                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
-                    return;
-                }
-            } 
+            if (!CheckRequiedItems(insertOrUpdate))
+                return;
+            string notificationText;
+            string notificationHeaderText;
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -192,6 +136,70 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
+        }
+        private void ConvertWholeObject(ref object insertOrUpdate)
+        {
+            foreach (var item in ItemsOfClasses)
+            {
+                var prop = insertOrUpdate.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
+                if (null == prop || !prop.CanWrite) continue;
+                var targetType = prop.PropertyType;
+                try
+                {                    
+                    var IsItCollection = item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown || item.Type == TypeOfInput.Enum;
+                    var IsItDateTime = targetType == typeof(DateTime);
+                    if (IsItCollection)
+                    {
+                        ConvertCollection(insertOrUpdate, item, prop, targetType);
+                    }
+                    else if (IsItDateTime)
+                    {
+                        ConvertDateTime(insertOrUpdate, item, prop);
+                    }
+                    else
+                    {
+                        ConvertOtherValues(insertOrUpdate, item, prop, targetType);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var rs = relatedSource.Find(x => x.Name == prop.Name);
+                    var error = basicResource["InputError"].Value;
+                    toastService.ShowError($"{error} :  -'{rs}'-Detail:'{ex.Message}'", basicResource["InputErrorHeader"].Value);
+                    return;
+                }
+
+            }
+        }
+        private   void ConvertOtherValues(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
+        {
+            var convertedValue = default(object);
+            if (string.IsNullOrEmpty(item?.Value))
+                convertedValue = null;
+            else
+                convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
+            prop.SetValue(insertOrUpdate, convertedValue, null);
+        }
+
+        private   void ConvertDateTime(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
+        {
+            prop.SetValue(insertOrUpdate, item.DateTime, null);
+        }
+
+        private void ConvertCollection(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
+        {
+            var convertedValue = default(object);
+            if (item.ValueColection is not null)
+                convertedValue = item.Type switch
+                {
+                    TypeOfInput.DropDown or TypeOfInput.Enum =>
+                      TypeDescriptor.GetConverter(targetType).ConvertFrom(item.ValueColection.FirstOrDefault()),
+                    TypeOfInput.MultipleSelectedDropDown => GetList(item.ValueColection, targetType.GetGenericArguments()[0]),
+                    _ => throw new NotImplementedException()
+                };
+            else
+                convertedValue = null;
+            prop.SetValue(insertOrUpdate, convertedValue, null);
         }
 
         private object GetList(IEnumerable<object> valueColection, Type type)
@@ -239,8 +247,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         private async Task Edit(string id)
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
-
-            var response = await dataObj.Content.ReadAsStringAsync(); 
+            var response = await dataObj.Content.ReadAsStringAsync();
             var generic = typeof(ApiResult<>);
             Type constructed = generic.MakeGenericType(Dto);
             var res = DeserializeObject(response!, constructed);
@@ -253,32 +260,33 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             foreach (var item in ItemsOfClasses)
             {
-                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance); 
+                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
+                Console.WriteLine(prop.Name);
+                Console.WriteLine(prop.PropertyType);
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
 
                 }
                 else if (prop?.PropertyType == typeof(Boolean))
-                { 
+                {
                     item!.Valuebool = (bool)prop.GetValue(data, null)!;
                 }
                 //else if (prop?.PropertyType.GetDirectInterfaces(true).Any(x => x == typeof(ICollection)) == true) 
-                else if (item.Type is  TypeOfInput.MultipleSelectedDropDown)
+                else if (item.Type is TypeOfInput.MultipleSelectedDropDown)
                 {
 
                     var desiredData = prop.GetValue(data, null)!;
 
                     item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
-                     
+
                 }
                 else if (item.Type is TypeOfInput.DropDown)
                 {
-
                     var desiredData = prop.GetValue(data, null)!;
 
                     item!.ValueColection = new List<object>();
-                    item!.ValueColection.Add(desiredData); 
+                    item!.ValueColection.Add(desiredData);
                 }
                 else
                 {
@@ -408,18 +416,18 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         }
         private bool CheckEligibilityToShow(HiddenDtoAttribute hiddenDtoAttribute, formStatus formStatus)
-        { 
+        {
             if (hiddenDtoAttribute is null)
                 return true;
 
             return (hiddenDtoAttribute.status, formStatus) switch
             {
-                (HiddenStatus.Edit, formStatus.Edit) =>false,
-                (HiddenStatus.Create, formStatus.Create) =>false,
-                (HiddenStatus.EditAndCreate, formStatus.Edit ) => false,
-                (HiddenStatus.EditAndCreate, formStatus.Create ) => false,
+                (HiddenStatus.Edit, formStatus.Edit) => false,
+                (HiddenStatus.Create, formStatus.Create) => false,
+                (HiddenStatus.EditAndCreate, formStatus.Edit) => false,
+                (HiddenStatus.EditAndCreate, formStatus.Create) => false,
                 _ => true
-            };  
+            };
         }
         private async Task Init()
         {
@@ -431,24 +439,24 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             foreach (var property in propertyInfos)
             {
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
-                
+
                 if (!CheckEligibilityToShow(hiddenDto, (Key != default) ? formStatus.Edit : formStatus.Create))  // What we don't want to include in our form
                     continue;
-                var key = property.GetCustomAttribute<KeyAttribute>(); 
-                if (key is not null || property.Name == "Id") continue; 
+                var key = property.GetCustomAttribute<KeyAttribute>();
+                if (key is not null || property.Name == "Id") continue;
 
                 var displayName = property.GetCustomAttribute<DisplayAttribute>()?.Name;//Name that should be placed as its label
 
                 var relatedTo = property.GetCustomAttribute<RelatedToAttribute>();// To check if we need to implement this field as a Dropdown or not
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
                 var file = property.GetCustomAttribute<FileAttribute>();
-                var required = property.GetCustomAttribute<RequiredAttribute>() is null ? false : true ;
-                 
+                var required = property.GetCustomAttribute<RequiredAttribute>() is null ? false : true;
+
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
 
                     if (Key != default && !string.IsNullOrEmpty(relatedTo.FunctionToCall))
-                        relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall }/{Key}";
+                        relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall}/{Key}";
                     var list = await FillDropDown(relatedTo, cancellationTokenSource.Token);
                     ItemsOfClasses.Add(
                         new ItemsOfClass(order)
@@ -456,7 +464,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                             Name = property.Name,
                             DisplayName = displayName,
                             Collection = list,
-                            Type =property.PropertyType.GetInterface(nameof(IEnumerable)) is not null ? TypeOfInput.MultipleSelectedDropDown : TypeOfInput.DropDown,
+                            Type = property.PropertyType.GetInterface(nameof(IEnumerable)) is not null ? TypeOfInput.MultipleSelectedDropDown : TypeOfInput.DropDown,
                             Value = null,
                             property = property,
                             Required = required
@@ -469,11 +477,11 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else
                 {
                     if (file is not null)
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property,Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property, Required = required });
 
                     else if (property.PropertyType == typeof(String))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
-                    else if (property.PropertyType == typeof(DateTime) ||  property.PropertyType == typeof(DateTime?))
+                    else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required });
                     else if (property.PropertyType == typeof(Boolean))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false, Required = required });
