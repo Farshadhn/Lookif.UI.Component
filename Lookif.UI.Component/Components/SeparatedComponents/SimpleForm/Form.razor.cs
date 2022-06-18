@@ -50,6 +50,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
         #region ...Events...
 
+        #region ... Built in ...
 
         protected async override Task OnAfterRenderAsync(bool firstRender)
         {
@@ -65,32 +66,15 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
 
-        private bool CheckRequiedItems(object insertOrUpdate)
-        {
-            //Check required
-            foreach (var item in ItemsOfClasses.Where(x => x.Required))
-            {
-                var value = insertOrUpdate.GetPropValue(item.Name);
-                if (value == default)
-                {
-                    var error = basicResource["InputError"].Value;
-                    var errorDetail = basicResource["InputRequireError"].Value;
+        #endregion
 
-                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
-                    errorDetail = errorDetail.Replace("{field}", name);
-                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
-                    return false;
-                }
-            }
-            return true;
-        }
+        #region ... Add ... 
         /// <summary>
         /// Add Or Create New
         /// </summary>  
         /// <returns></returns>
         private async Task Add()
         {
-            //await Task.Delay(1000);
             if (Key != default)
             {
                 var IsItReallyOkay = await Confirm();
@@ -104,7 +88,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             ConvertWholeObject(ref insertOrUpdate);
             var returnStr = String.Empty;
             if (!CheckRequiedItems(insertOrUpdate))
-                return;
+                return; ;
+
             string notificationText;
             string notificationHeaderText;
             if (Key == default)
@@ -137,6 +122,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             await OnFinished.InvokeAsync(returnStr);
             toastService.ShowSuccess(notificationText, notificationHeaderText);
         }
+
+
+
+        #region ... Add Related ... 
         private void ConvertWholeObject(ref object insertOrUpdate)
         {
             foreach (var item in ItemsOfClasses)
@@ -145,7 +134,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (null == prop || !prop.CanWrite) continue;
                 var targetType = prop.PropertyType;
                 try
-                {                    
+                {
                     var IsItCollection = item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown || item.Type == TypeOfInput.Enum;
                     var IsItDateTime = targetType == typeof(DateTime);
                     if (IsItCollection)
@@ -171,7 +160,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             }
         }
-        private   void ConvertOtherValues(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
+        private void ConvertOtherValues(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
         {
             var convertedValue = default(object);
             if (string.IsNullOrEmpty(item?.Value))
@@ -181,11 +170,52 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             prop.SetValue(insertOrUpdate, convertedValue, null);
         }
 
-        private   void ConvertDateTime(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
+        private void ConvertDateTime(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
         {
             prop.SetValue(insertOrUpdate, item.DateTime, null);
         }
 
+        private bool CheckRequiedItems(object insertOrUpdate)
+        {
+            //Check required
+            foreach (var item in ItemsOfClasses.Where(x => x.Required))
+            {
+                Console.WriteLine(item.Name);
+                var value = insertOrUpdate.GetPropValue(item.Name);
+
+                if (value is null)
+                {
+                    var error = basicResource["InputError"].Value;
+                    var errorDetail = basicResource["InputRequireError"].Value;
+
+                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
+                    errorDetail = errorDetail.Replace("{field}", name);
+                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    return false;
+                }
+                else if (value.GetType() == typeof(string) && value == default)
+                {
+                    var error = basicResource["InputError"].Value;
+                    var errorDetail = basicResource["InputRequireError"].Value;
+
+                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
+                    errorDetail = errorDetail.Replace("{field}", name);
+                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    return false;
+                }
+                else if (value.GetType() != typeof(string) && value.ToString() == Activator.CreateInstance(value.GetType()).ToString())
+                {
+                    var error = basicResource["InputError"].Value;
+                    var errorDetail = basicResource["InputRequireError"].Value;
+
+                    var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
+                    errorDetail = errorDetail.Replace("{field}", name);
+                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    return false;
+                }
+            }
+            return true;
+        }
         private void ConvertCollection(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
         {
             var convertedValue = default(object);
@@ -201,7 +231,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 convertedValue = null;
             prop.SetValue(insertOrUpdate, convertedValue, null);
         }
-
         private object GetList(IEnumerable<object> valueColection, Type type)
         {
             //we need to convert everything
@@ -209,7 +238,13 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 return valueColection?.ToList().ConvertAll(x => Guid.Parse(x.ToString()));
             return valueColection;
         }
+        #endregion 
 
+
+
+
+
+        #endregion
         #endregion
 
 
@@ -280,13 +315,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                     item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
 
-                }
-                else if (item.Type is TypeOfInput.DropDown)
-                {
-                    var desiredData = prop.GetValue(data, null)!;
-
-                    item!.ValueColection = new List<object>();
-                    item!.ValueColection.Add(desiredData);
                 }
                 else
                 {
@@ -438,10 +466,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
             {
+               
                 var hiddenDto = property.GetCustomAttribute<HiddenDtoAttribute>();
 
                 if (!CheckEligibilityToShow(hiddenDto, (Key != default) ? formStatus.Edit : formStatus.Create))  // What we don't want to include in our form
                     continue;
+                await Task.Delay(300);
                 var key = property.GetCustomAttribute<KeyAttribute>();
                 if (key is not null || property.Name == "Id") continue;
 

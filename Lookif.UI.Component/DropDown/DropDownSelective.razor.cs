@@ -19,6 +19,7 @@ namespace Lookif.UI.Component.DropDown
 
         [Parameter] public EventCallback<T> OnChange { get; set; }
 
+
         private List<T> returnValue;
 
         [Inject] IToastService toastService { get; set; }
@@ -147,12 +148,17 @@ namespace Lookif.UI.Component.DropDown
                     SanitizedRecords.FirstOrDefault(x => x.Status).Key
                 };
 
-                await OnChange.InvokeAsync(res.FirstOrDefault());
+                if (res.FirstOrDefault() is null)
+                    await OnChange.InvokeAsync(default);
+                else
+                    await OnChange.InvokeAsync(res.FirstOrDefault());
+
                 await ReturnValueChanged.InvokeAsync(res);
             }
             catch (Exception)
             {
                 Selected = "";
+                await OnChange.InvokeAsync(default);
                 await ReturnValueChanged.InvokeAsync(default);
             }
 
@@ -188,6 +194,11 @@ namespace Lookif.UI.Component.DropDown
                 return;
             if (key.Equals(default(T)))
                 return;
+
+
+
+
+
             var res = new DropdownContextHolder<T>();
             if (reset)
                 SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
