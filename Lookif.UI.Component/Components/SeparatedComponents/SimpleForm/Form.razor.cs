@@ -459,7 +459,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
         private async Task Init()
         {
-
+            //var x = Dto.GetCustomAttribute<ColumnsAttribute>();
+            //Console.WriteLine(SerializeObject(x));
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
             await Task.Delay(300);
@@ -481,6 +482,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var order = property.GetCustomAttribute<OrderAttribute>()?.Order ?? 100;// To check if we need to implement this field as a Dropdown or not
                 var file = property.GetCustomAttribute<FileAttribute>();
                 var required = property.GetCustomAttribute<RequiredAttribute>() is null ? false : true;
+                var appearance = property.GetCustomAttribute<AppearanceAttribute>() ?? new AppearanceAttribute(0,0,0);
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
@@ -497,7 +499,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                             Type = property.PropertyType.GetInterface(nameof(IEnumerable)) is not null ? TypeOfInput.MultipleSelectedDropDown : TypeOfInput.DropDown,
                             Value = null,
                             property = property,
-                            Required = required
+                            Required = required,
+                            Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize)
                         });
 
 
@@ -507,21 +510,21 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else
                 {
                     if (file is not null)
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property, Required = required, Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize) });
 
                     else if (property.PropertyType == typeof(String))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required, Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize) });
                     else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required, Appearance = new Appearance(appearance.DivSize,appearance.LabelSize, appearance.InputSize) });
                     else if (property.PropertyType == typeof(Boolean))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Value = "false", Type = TypeOfInput.CheckBox, Valuebool = false, Required = required, Appearance = new Appearance(appearance.DivSize,appearance.LabelSize, appearance.InputSize) });
                     else if (property.PropertyType.IsEnum)
                     {
                         var list = FillEnum(property, displayName);
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Enum, Collection = list, Required = required, Appearance = new Appearance(appearance.DivSize,appearance.LabelSize, appearance.InputSize) });
                     }
                     else
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required });
+                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required, Appearance = new Appearance(appearance.DivSize,appearance.LabelSize, appearance.InputSize) });
 
 
                 }
@@ -618,6 +621,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         public PropertyInfo property { get; set; }
         public int Order { get; set; }
         public bool Required { get; set; }
+        public Appearance Appearance { get; set; }
 
 
     }

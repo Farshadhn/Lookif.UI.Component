@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PrivateAssets>all</PrivateAssets>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Farshad Hosseini nejad</Authors>
     <Company>Lookif</Company>
@@ -17,9 +17,9 @@ Blazored.Modal and Blazored.Toast are used in this project.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
-    <AssemblyVersion>1.2.20</AssemblyVersion>
-    <FileVersion>1.2.20</FileVersion>
-    <Version>1.2.20</Version>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <FileVersion>2.0.0</FileVersion>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   

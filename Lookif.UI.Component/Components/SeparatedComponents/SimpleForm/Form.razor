@@ -21,9 +21,14 @@
 
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
-        <div class='form-group col-@(CountOfItemsOfClasses > 8 ?"3":"4") FormAlign LH' style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap">
+        var DivSize = item.Appearance?.DivSize == 0 ? 4 : item.Appearance.DivSize;
+        var LabelSize = item.Appearance?.LabelSize == 0 ? 2 : item.Appearance.LabelSize;
+        var InputSize = item.Appearance?.InputSize == 0 ? 10 : item.Appearance.InputSize;
 
-            <label class='col-4 col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder;'>
+        <div class='form-group col-@(DivSize) FormAlign LH' style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap">
+
+
+            <label class='col-@(LabelSize) col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder;'>
 
                 @if (relatedSource is null) // When there is no source file
                 {
@@ -51,7 +56,8 @@
                 }
 
             </label>
-            <div class="col-@(CountOfItemsOfClasses > 8 ?"8":"7")">
+
+            <div class="col-@(InputSize)">
 
                 @if (item.Type is TypeOfInput.Text)
                 {
