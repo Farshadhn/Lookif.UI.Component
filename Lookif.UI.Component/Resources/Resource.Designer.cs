@@ -241,6 +241,15 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Page Number.
+        /// </summary>
+        internal static string PageNumber {
+            get {
+                return ResourceManager.GetString("PageNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select Options.
         /// </summary>
         internal static string Select {
