@@ -88,8 +88,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             ConvertWholeObject(ref insertOrUpdate);
             var returnStr = String.Empty;
             if (!CheckRequiedItems(insertOrUpdate))
-                return; ;
-
+                return;  
             string notificationText;
             string notificationHeaderText;
             if (Key == default)
@@ -137,6 +136,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
                     var IsItCollection = item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown || item.Type == TypeOfInput.Enum;
                     var IsItDateTime = targetType == typeof(DateTime);
+                    var IsItBoolean= targetType == typeof(Boolean);
                     if (IsItCollection)
                     {
                         ConvertCollection(insertOrUpdate, item, prop, targetType);
@@ -144,6 +144,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     else if (IsItDateTime)
                     {
                         ConvertDateTime(insertOrUpdate, item, prop);
+                    }
+                    else if (IsItBoolean)
+                    {
+                        ConvertBoolean(insertOrUpdate, item, prop);
                     }
                     else
                     {
@@ -174,13 +178,15 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         {
             prop.SetValue(insertOrUpdate, item.DateTime, null);
         }
-
+        private void ConvertBoolean(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
+        {
+            prop.SetValue(insertOrUpdate, item.Valuebool, null);
+        }
         private bool CheckRequiedItems(object insertOrUpdate)
         {
             //Check required
             foreach (var item in ItemsOfClasses.Where(x => x.Required))
-            {
-                Console.WriteLine(item.Name);
+            { 
                 var value = insertOrUpdate.GetPropValue(item.Name);
 
                 if (value is null)
@@ -295,17 +301,15 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             foreach (var item in ItemsOfClasses)
             {
-                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
-                Console.WriteLine(prop.Name);
-                Console.WriteLine(prop.PropertyType);
+                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance); 
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
 
                 }
                 else if (prop?.PropertyType == typeof(Boolean))
-                {
-                    item!.Valuebool = (bool)prop.GetValue(data, null)!;
+                { 
+                    item!.Valuebool = (bool)prop.GetValue(data, null)!; 
                 }
                 //else if (prop?.PropertyType.GetDirectInterfaces(true).Any(x => x == typeof(ICollection)) == true) 
                 else if (item.Type is TypeOfInput.MultipleSelectedDropDown)
@@ -459,8 +463,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
         private async Task Init()
         {
-            //var x = Dto.GetCustomAttribute<ColumnsAttribute>();
-            //Console.WriteLine(SerializeObject(x));
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(10000);
             ItemsOfClasses = new List<ItemsOfClass>();
             await Task.Delay(300);

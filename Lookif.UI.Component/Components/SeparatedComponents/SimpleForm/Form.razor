@@ -17,6 +17,7 @@
         color: red;
     }
 </style>
+
 <div class="col-12 d-inline-block">
 
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
@@ -102,6 +103,6 @@
 
 </div>
 <div class="col-12">
-    <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width:170px" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
-    <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width: 170px " @onclick="Clear">@basicResource["Clear"]</button>
+    <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width:170px;font-size: large;" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
+    <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width: 170px;font-size: large;" @onclick="Clear">@basicResource["Clear"]</button>
 </div> 

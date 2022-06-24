@@ -1,9 +1,9 @@
 ﻿@namespace Lookif.UI.Component.Modals
 
 
-<div style="width: 200px; text-align-last: center;">
-    <button @onclick="OnCancel" class="btn btn-info">@NO</button> 
-    <button @onclick="OnConfirm" class="btn btn-warning">@YES</button> 
+<div style="width: 330px; text-align-last: center;">
+    <button style="width: 150px;font-size: large;" @onclick="OnCancel" class="btn btn-info">@NO</button> 
+    <button style="width: 150px;font-size: large;" @onclick="OnConfirm" class="btn btn-warning">@YES</button> 
 </div>
 
 
@@ -11,5 +11,12 @@
  <style>
      h3 {
      font-family:'IranSansBold'
+     }
+     .blazored-modal-close span{
+     font-size:xx-large
+     }
+     .blazored-modal-close 
+     {
+         padding: 0 10px 0 0;
      }
      </style>
