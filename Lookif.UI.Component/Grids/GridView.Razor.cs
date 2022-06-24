@@ -68,7 +68,7 @@ namespace Lookif.UI.Component.Grids
                 foreach (var input in records)
                 { 
                     var temp = new List<ValuePlaceHolder>();
-                    foreach (var item in PropertyInformations)
+                    foreach (var item in PropertiesInformation)
                     {
                         try
                         { 
@@ -116,12 +116,13 @@ namespace Lookif.UI.Component.Grids
         /// </summary>
         private void FindAllProperties()
         {
-            PropertyInformations = new List<PropertyInformation>();
+            PropertiesInformation = new List<PropertyInformation>();
             foreach (var item in typeof(TSelectItem).GetProperties())
             {
 
                 var key = item.GetCustomAttribute<KeyAttribute>();
                 var hiddenItem = item.GetCustomAttribute<HiddenAttribute>();
+                var gridColumn = item.GetCustomAttribute<GridColumnAttribute>();
                 Type type = item.PropertyType;
                 if ((!(hiddenItem is null) || type == typeof(Guid)) && (key is null))
                 {
@@ -129,13 +130,14 @@ namespace Lookif.UI.Component.Grids
                 }
                 var displayName = item.GetCustomAttribute<DisplayAttribute>()?.Name;
 
-                PropertyInformations.Add(
+                PropertiesInformation.Add(
                     new PropertyInformation()
                     {
                         Displayname = displayName,
                         PropertyName = item.Name,
                         Key = key is not null,
-                        TypeOfObject = type
+                        TypeOfObject = type,
+                        Width = gridColumn is not null ? gridColumn.Width : "5vw"
 
                     }
 
@@ -153,7 +155,7 @@ namespace Lookif.UI.Component.Grids
 
         private List<List<ValuePlaceHolder>> FilteredRecords { get; set; }
         private List<List<ValuePlaceHolder>> PagedRecords { get; set; }
-        internal List<PropertyInformation> PropertyInformations { get; set; }
+        internal List<PropertyInformation> PropertiesInformation { get; set; }
         private int CurrentPage { get; set; } = 1;
         public int Count
         {
@@ -290,7 +292,7 @@ namespace Lookif.UI.Component.Grids
             var containsSearch = false;
             var temp = new List<List<ValuePlaceHolder>>();
 
-            foreach (var item in PropertyInformations)
+            foreach (var item in PropertiesInformation)
             {
 
                 if (string.IsNullOrEmpty(item.Value) || item.Value == default || string.IsNullOrWhiteSpace(item.Value))

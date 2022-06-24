@@ -241,6 +241,15 @@ namespace Lookif.UI.Component.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Numer Of Records In A Page.
+        /// </summary>
+        internal static string NumerOfRecordsInAPage {
+            get {
+                return ResourceManager.GetString("NumerOfRecordsInAPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Page Number.
         /// </summary>
         internal static string PageNumber {

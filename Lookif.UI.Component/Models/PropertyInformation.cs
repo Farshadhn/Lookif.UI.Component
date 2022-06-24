@@ -39,5 +39,7 @@ namespace Lookif.UI.Component.Models
         public Type TypeOfObject { get; set; }
 
 
+        public string Width { get; set; }
+
     }
 }

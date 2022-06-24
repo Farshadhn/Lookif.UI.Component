@@ -67,12 +67,14 @@ else
             <tr style="background-color: gainsboro;">
                 <th style="font-style:inherit">@basicResource["Filter"]</th>
                 @{
-                    foreach (var item in PropertyInformations)
+                    foreach (var item in PropertiesInformation)
                     {
                         if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
                             continue;
+                          
                         //text - align - last: center;
-                            <th style=" min-width: 5vw;">
+                            //<th style=' min-width: 5vw;'>
+                            <th style=' width: @item.Width;'>
                                 <span class="LH" style="vertical-align: middle;">
                                     @{
                                     if (relatedSource is null) // When there is no source file
@@ -107,7 +109,7 @@ else
                                 <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
                                 </div>*@
                                 <div>
-                                    <input class="LH" type="text" @bind="item.Value" style="width: 70%;" @onkeyup="Search" />
+                                    <input class="LH" type="text" @bind="item.Value" style="width: 90%;" @onkeyup="Search" />
                                 </div>
                             </th>
                     }
@@ -119,7 +121,7 @@ else
         @if (PagedRecords is null || !PagedRecords.Any())
         {
             <tr>
-                <td colspan="@PropertyInformations.Count()">
+                <td colspan="@PropertiesInformation.Count()">
                     <p>@basicResource["NoRecord"]</p>
                 </td>
             </tr>
@@ -213,7 +215,11 @@ else
                 </div>
             }
         </div>
-        <div class="col-3">
+        <div class="col-3">   
+            <span>
+            @basicResource["NumerOfRecordsInAPage"]
+            
+            </span>
             <select @bind="Count">
 
                 <option value="5">5</option>

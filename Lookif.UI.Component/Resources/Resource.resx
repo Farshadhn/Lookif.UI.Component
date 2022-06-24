@@ -177,6 +177,9 @@
   <data name="NoRecord" xml:space="preserve">
     <value>NoRecord</value>
   </data>
+  <data name="NumerOfRecordsInAPage" xml:space="preserve">
+    <value>Numer Of Records In A Page</value>
+  </data>
   <data name="PageNumber" xml:space="preserve">
     <value>Page Number</value>
   </data>

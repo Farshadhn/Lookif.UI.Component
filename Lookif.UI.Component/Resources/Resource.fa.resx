@@ -177,6 +177,9 @@
   <data name="NoRecord" xml:space="preserve">
     <value>داده ای برای نمایش موجود نیست</value>
   </data>
+  <data name="NumerOfRecordsInAPage" xml:space="preserve">
+    <value>تعداد ردیف ها در صفحه</value>
+  </data>
   <data name="PageNumber" xml:space="preserve">
     <value>شماره صفحه</value>
   </data>
