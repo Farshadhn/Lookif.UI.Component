@@ -47,19 +47,18 @@ namespace Lookif.UI.Component.DropDown
 
         public void ReSelect(List<T> seletedOptions)
         {
-            if (seletedOptions is null or { Count: < 1 })
-                throw new ArgumentNullException(nameof(seletedOptions));
-            ShowAlreadySelectedOptions(seletedOptions);
+            if (seletedOptions is not { Count: < 1 })
+                ShowAlreadySelectedOptions(seletedOptions);
         }
 
 
         private void ConvertToDropdownContextHolder(IReadOnlyCollection<object> newValue)
         {
-            SanitizedRecords = new();
+            SanitizedRecords = new(); 
             foreach (var Record in newValue)
             {
-
                 var property = Record.GetType().GetProperty(Value);
+
                 var targetObject = property.GetValue(Record, null);
                 if (targetObject is null)
                     continue;
@@ -70,6 +69,7 @@ namespace Lookif.UI.Component.DropDown
                 if (!SanitizedRecords.Any(x => x.Key.Equals(DropDownKey)))
                     SanitizedRecords.Add(new DropdownContextHolder<T>(DropDownValue, DropDownKey));
             }
+            
         }
 
         private void Bind()
@@ -87,11 +87,9 @@ namespace Lookif.UI.Component.DropDown
 
         private void ShowAlreadySelectedOptions(List<T> seletedOptions)
         {
-            bool DoesItHaveSelectedValue = seletedOptions is not null && !seletedOptions.Equals(default(List<T>));
-
+            bool DoesItHaveSelectedValue = seletedOptions is not null && !seletedOptions.Equals(default(List<T>)); 
             if (!DoesItHaveSelectedValue)
-                return;
-
+                return; 
             if (Multiple)
                 DefineInMultipleChoice(seletedOptions);
             else
@@ -108,12 +106,20 @@ namespace Lookif.UI.Component.DropDown
 
         private void DefineInMultipleChoice(List<T> seletedOptions)
         {
-            seletedOptions.AsParallel().ForAll(x => SetIdFromKey(x, false));
+            for (int i = 0; i < seletedOptions.Count; i++)
+            {
+                SetIdFromKey(seletedOptions[i], false);
+               
+            } 
         }
 
         private void resetAll()
         {
-            SanitizedRecords.AsParallel().ForAll(record => record.Status = false);
+            for (int i = 0; i < SanitizedRecords.Count; i++)
+            {
+                SanitizedRecords[i].Status = false;
+
+            } 
         }
 
         #endregion
@@ -181,7 +187,7 @@ namespace Lookif.UI.Component.DropDown
 
             var res = new DropdownContextHolder<T>();
             if (reset)
-                SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
+                resetAll();
             res = SanitizedRecords.FirstOrDefault(x => x.Content.Trim() == Content.Trim());
             if (res is null)
                 throw new Exception($@"{Content} not found");
@@ -193,16 +199,15 @@ namespace Lookif.UI.Component.DropDown
             if (key is null)
                 return;
             if (key.Equals(default(T)))
-                return;
-
-
-
-
-
+                return; 
+            var toCompare = (key.GetType().IsEnum) ? SerializeObject(key) : key.ToString();
+             
             var res = new DropdownContextHolder<T>();
             if (reset)
-                SanitizedRecords.AsParallel().ForAll(x => x.Status = false);
-            res = SanitizedRecords.FirstOrDefault(x => x.Key.ToString() == key.ToString());
+            {
+                resetAll();
+            } 
+            res = SanitizedRecords.FirstOrDefault(x =>  x.Key.ToString() == toCompare);
 
             if (res is null)
                 throw new Exception($@"{key} not found");

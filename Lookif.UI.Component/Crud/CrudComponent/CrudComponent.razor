@@ -37,8 +37,9 @@ else
 }
 <div class="row text-center IranSansBold ChangeDirection">
 
-    <h3 class="col-12 alert p-0 alert-info">@basicResource["FormTitle"] @FormName</h3>
-
+    <h3 class="col-12 alert p-0 alert-info">@basicResource["FormTitle"] @FormName
+    <buton class="btn btn-warning" @onclick="OnClearCache">خالی کردن حافظه  </buton>
+</h3>
     <Form Dto="typeof(TItem)" OnFinished="Bind" Resource="Resource"></Form>
 
     <h3 class="col-12 alert p-0 alert-info">@basicResource["GridTitle"]  @FormName</h3>

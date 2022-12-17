@@ -7,19 +7,19 @@
     <Authors>Farshad Hosseini nejad</Authors>
     <Company>Lookif</Company>
     <Description>Some predefined components.
-It contains:
-*Crud page
-*Form
-*Dropdown - Selective
-*Grid
-----
-Blazored.Modal and Blazored.Toast are used in this project.</Description>
+        It contains:
+        *Crud page
+        *Form
+        *Dropdown - Selective
+        *Grid
+        ----
+        Blazored.Modal and Blazored.Toast are used in this project.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
-    <AssemblyVersion>2.1.0</AssemblyVersion>
-    <FileVersion>2.1.0</FileVersion>
-    <Version>2.1.0</Version>
+    <AssemblyVersion>2.2.0</AssemblyVersion>
+    <FileVersion>2.2.0</FileVersion>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   

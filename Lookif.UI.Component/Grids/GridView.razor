@@ -74,18 +74,18 @@ else
                           
                         //text - align - last: center;
                             //<th style=' min-width: 5vw;'>
-                            <th style=' width: @item.Width;'>
-                                <span class="LH" style="vertical-align: middle;">
-                                    @{
+                                            <th style=' width: @item.Width;'>
+                                                <span class="LH" style="vertical-align: middle;">
+                                                    @{
                                     if (relatedSource is null) // When there is no source file
                                     {
                                         if (@item.Displayname is null) // when there is no displayName
                                         {
-                                                    @item.PropertyName
+                                                                                    @item.PropertyName
                                         }
                                         else
                                         {
-                                                    @item.Displayname
+                                                                                    @item.Displayname
                                         }
                                     }
                                     else
@@ -93,25 +93,25 @@ else
                                         var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
                                         if (value == "")
                                         {
-                                                    @item.PropertyName
+                                                                                    @item.PropertyName
                                         }
                                         else
                                         {
-                                                    @value
+                                                                                    @value
                                         }
 
                                     }
-                                    }
+                                                    }
 
-                                </span>
-                                @*<div>
+                                                </span>
+                                                @*<div>
                                 <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
                                 <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
                                 </div>*@
-                                <div>
-                                    <input class="LH" type="text" @bind="item.Value" style="width: 90%;" @onkeyup="Search" />
-                                </div>
-                            </th>
+                                                <div>
+                                                    <input class="LH" type="text" @bind="item.Value" style="width: 90%;" @onkeyup="Search" />
+                                                </div>
+                                            </th>
                     }
                 }
 
@@ -135,32 +135,32 @@ else
 
                     @{
                         var Id = record.FirstOrDefault(x => x.ObjectName == "Id").ObjectValue;
-                            <td>
+                                            <td>
 
 
-                                @if (EditBtn)
+                                                @if (EditBtn)
                             {
-                                    <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
+                                                    <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
 
                             }
-                                @if (DeleteBtn)
+                                                @if (DeleteBtn)
                             {
-                                    <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
+                                                    <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
 
                             }
 
 
-                            </td>
-                            @foreach (var item in record)
+                                            </td>
+                                            @foreach (var item in record)
                         {
 
                             if (item.ObjectName != "Id")
                             {
 
-                                    <td class="LH" style="vertical-align: middle;" align="justify">
-                                         
-                                        @(DateTime.TryParse(@item.ObjectValue,out DateTime date)?(date == DateTime.MinValue?"-": date.Date.ToString("yyyy/MM/dd")):@item.ObjectValue)
-                                    </td>
+                                                    <td class="LH" style="vertical-align: middle;" align="justify">
+                                                         
+                                                        @(DateTime.TryParse(@item.ObjectValue,out DateTime date)?(date == DateTime.MinValue?"-": date.Date.ToString("yyyy/MM/dd")):@item.ObjectValue)
+                                                    </td>
                             }
                         }
 
@@ -181,7 +181,9 @@ else
             ||
             <span>
             @basicResource["PageNumber"]:
-            @CurrentPage
+            @CurrentPage 
+            @basicResource["From"]
+            @((int)Math.Ceiling((double)FilteredRecords!.Count / Count))
             </span>
 
         </div>
@@ -202,7 +204,7 @@ else
                             for (int i = firstPage; i <= lastPage; i++)
                             {
                                 int y = i;
-                                    <div style="cursor: pointer;border-radius:0px;background-color:@(y == CurrentPage ?"lightblue":"lightgray")" class="pd-2 btn" @onclick="() => ChangePage(y)">@i</div>
+                                                    <div style="cursor: pointer;border-radius:0px;background-color:@(y == CurrentPage ?"lightblue":"lightgray")" class="pd-2 btn" @onclick="() => ChangePage(y)">@i</div>
                             }
                         }
                         catch (Exception e)
@@ -222,10 +224,7 @@ else
             </span>
             <select @bind="Count">
 
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
+               
                 <option value="100">100</option>
 
             </select>

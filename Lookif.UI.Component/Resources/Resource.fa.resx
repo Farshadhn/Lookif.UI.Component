@@ -154,7 +154,10 @@
     <value>فیلترها</value>
   </data>
   <data name="FormTitle" xml:space="preserve">
-    <value>ساخت</value>
+    <value>ثبت</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>از</value>
   </data>
   <data name="GridTitle" xml:space="preserve">
     <value>لیست</value>

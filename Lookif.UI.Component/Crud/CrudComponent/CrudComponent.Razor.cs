@@ -51,7 +51,10 @@ namespace Lookif.UI.Component.Crud.CrudComponent
             await Bind();
         }
 
-
+        private async Task OnClearCache()
+        {
+            await Http.DeleteAsync("RequestedModel/ClearCache");
+        }
 
 
     }

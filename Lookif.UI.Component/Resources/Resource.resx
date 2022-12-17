@@ -156,6 +156,9 @@
   <data name="FormTitle" xml:space="preserve">
     <value>Submit</value>
   </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
   <data name="GridTitle" xml:space="preserve">
     <value>List of </value>
   </data>

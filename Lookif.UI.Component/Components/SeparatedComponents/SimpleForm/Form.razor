@@ -17,7 +17,11 @@
         color: red;
     }
 </style>
-
+@if (ready is false)
+{
+<h2 style="text-align:center">لطفا منتظر بمانید ... </h2>    
+return;
+}
 <div class="col-12 d-inline-block">
 
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
@@ -66,12 +70,13 @@
                 }
                 else if (item.Type is TypeOfInput.DropDown or TypeOfInput.MultipleSelectedDropDown or TypeOfInput.Enum)
                 {
-                    <DropDownSelective Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)
-                               SelectedOption="@item.ValueColection"
-                               Records="@item.Collection"
-                               Key="Id"
-                               Value="Name"
-                               @bind-ReturnValue="item.ValueColection"></DropDownSelective>
+                    <DropDownSelective 
+                        Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)
+                        SelectedOption="@item.ValueColection"
+                        Records="@item.Collection"
+                        Key="Id"
+                        Value="Name"
+                        @bind-ReturnValue="item.ValueColection"></DropDownSelective>
                 }
                 else if (item.Type is TypeOfInput.DateTime)
                 {
@@ -82,11 +87,11 @@
                 {
                     if (item.Valuebool)
                     {
-                        <input class="form-control LH" type="checkbox" checked @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
+                        <input class="form-control LH" type="checkbox" checked @onchange='(x => item.Valuebool = ((bool)x.Value))' />
                     }
                     else
                     {
-                        <input class="form-control LH" type="checkbox" @onchange='(x => item.Value = ((bool)x.Value).ToString())' />
+                        <input class="form-control LH" type="checkbox" @onchange='(x => item.Valuebool = ((bool)x.Value))' />
                     }
 
                 }
