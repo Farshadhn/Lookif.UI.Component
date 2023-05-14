@@ -1,0 +1,48 @@
+﻿@namespace Lookif.UI.Component.Crud.CrudComponent.V1
+@using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+@using Lookif.UI.Component.Grids.V1
+@typeparam TItem
+@typeparam TSelectItem
+
+@using System.Globalization
+@using Microsoft.Extensions.Localization;
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
+@{
+    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+
+}
+@if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
+{
+
+
+
+    <style>
+        .ChangeDirection {
+            direction: rtl;
+        }
+
+        .FormAlign {
+            float: right;
+        }
+    </style>
+}
+else
+{
+    <style>
+        .FormAlign {
+            float: left;
+        }
+    </style>
+}
+<div class="row text-center IranSansBold ChangeDirection">
+      <h3 class=" classinfo col-12 alert p-0 alert-info ">@basicResource["FormTitle"] @FormName
+    
+</h3>
+<buton  class="catchbtn btn btn-warning" @onclick="OnClearCache">خالی کردن حافظه  </buton>
+    <Form Dto="typeof(TItem)" OnFinished="Bind" Resource="Resource"></Form>
+
+    <h3 class=" classinfo col-12 alert p-0 alert-info">  @basicResource["GridTitle"]  @FormName</h3>
+
+    <GridView DeleteBtn="DeleteBtn" TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource" OnDeleteFinished="OnDeleteFinished"></GridView>
+</div>

@@ -1,8 +1,9 @@
 ﻿@namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+@using Lookif.Component.DropDown.Main;
 @using Lookif.UI.Component.Date.DateTimePickers
 @using Lookif.UI.Component.DropDown
 @using Lookif.UI.Component.Resources
-
+@using Lookif.Component.DateTimePicker;
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.Localization;
 
@@ -16,98 +17,107 @@
         content: " *";
         color: red;
     }
+
+    input[type=checkbox]
+    {
+    width: 20px;
+    }
 </style>
 @if (ready is false)
 {
-<h2 style="text-align:center">لطفا منتظر بمانید ... </h2>    
-return;
+    <h2 style="text-align:center">لطفا منتظر بمانید ... </h2>
+    return;
 }
-<div class="col-12 d-inline-block">
-
+<div class="row">
+    
     @foreach (var item in ItemsOfClasses.OrderBy(x => x.Order))
     {
         var DivSize = item.Appearance?.DivSize == 0 ? 4 : item.Appearance.DivSize;
-        var LabelSize = item.Appearance?.LabelSize == 0 ? 2 : item.Appearance.LabelSize;
-        var InputSize = item.Appearance?.InputSize == 0 ? 10 : item.Appearance.InputSize;
+        var LabelSize = item.Appearance?.LabelSize == 0 ? 3 : item.Appearance.LabelSize;
+        var InputSize = item.Appearance?.InputSize == 0 ? 9 : item.Appearance.InputSize;
 
-        <div class='form-group col-@(DivSize) FormAlign LH' style="display: flex; -ms-flex-wrap: wrap; flex-wrap: wrap">
+        <div class="col-@(DivSize) ">
+            <div class="d-flex flex-row justify-content-between">
+                <label class='col-@(LabelSize) @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder;'>
 
-
-            <label class='col-@(LabelSize) col-form-label @(item.Required ?"required": "")' style='font-size: inherit; font-weight: bolder;'>
-
-                @if (relatedSource is null) // When there is no source file
-                {
-                    if (@item.DisplayName is null) // when there is no displayName
+                    @if (relatedSource is null) // When there is no source file
                     {
-                        @item.Name
+                        if (@item.DisplayName is null) // when there is no displayName
+                        {
+                            @item.Name
+                        }
+                        else
+                        {
+                            @item.DisplayName
+                        }
                     }
                     else
                     {
-                        @item.DisplayName
+                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.Name)?.Value;
+                        if (value == "")
+                        {
+                            @item.Name
+                        }
+                        else
+                        {
+                            @value
+                        }
+
                     }
-                }
-                else
-                {
-                    var value = relatedSource.FirstOrDefault(x => x.Name == @item.Name)?.Value;
-                    if (value == "")
+
+                </label>
+
+                <div class="col-@(InputSize) " style="position:relative">
+
+                    @if (item.Type is TypeOfInput.Text)
                     {
-                        @item.Name
+                        <input class="form-control LH " @bind="item.Value" type="text"   />
                     }
-                    else
+                    else if (item.Type is TypeOfInput.DropDown or TypeOfInput.MultipleSelectedDropDown or TypeOfInput.Enum)
+                    { 
+                       <LFDropDown  Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)
+                                   SelectedOption="@item.ValueColection"
+                                   Records="@item.Collection"
+                                   Key="Id"
+                                   Value="Name"
+                                   @bind-ReturnValue="@item.ValueColection"></LFDropDown>
+                    }
+                    else if (item.Type is TypeOfInput.DateTime)
                     {
-                        @value
+                        <LFDateTimePicker ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></LFDateTimePicker>
+
                     }
-
-                }
-
-            </label>
-
-            <div class="col-@(InputSize)">
-
-                @if (item.Type is TypeOfInput.Text)
-                {
-                    <input class="form-control LH " @bind="item.Value" type="text" style="width: inherit;" />
-                }
-                else if (item.Type is TypeOfInput.DropDown or TypeOfInput.MultipleSelectedDropDown or TypeOfInput.Enum)
-                {
-                    <DropDownSelective 
-                        Multiple=@(item.Type == TypeOfInput.MultipleSelectedDropDown)
-                        SelectedOption="@item.ValueColection"
-                        Records="@item.Collection"
-                        Key="Id"
-                        Value="Name"
-                        @bind-ReturnValue="item.ValueColection"></DropDownSelective>
-                }
-                else if (item.Type is TypeOfInput.DateTime)
-                {
-                    <DateTimePickerDD ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></DateTimePickerDD>
-
-                }
-                else if (item.Type is TypeOfInput.CheckBox)
-                {
-                    if (item.Valuebool)
+                    else if (item.Type is TypeOfInput.CheckBox)
                     {
-                        <input class="form-control LH" type="checkbox" checked @onchange='(x => item.Valuebool = ((bool)x.Value))' />
+                        if (item.Valuebool)
+                        {
+                            <input class="LH" type="checkbox" checked @onchange='(x => item.Valuebool = ((bool)x.Value))' />
+                        }
+                        else
+                        {
+                            <input class="LH" type="checkbox" @onchange='(x => item.Valuebool = ((bool)x.Value))' />
+                        }
+
                     }
-                    else
+                    else if (item.Type is TypeOfInput.File)
                     {
-                        <input class="form-control LH" type="checkbox" @onchange='(x => item.Valuebool = ((bool)x.Value))' />
+                        <InputFile OnChange="(e)=>Upload(e,item)" multiple />
+
                     }
-
-                }
-                else if (item.Type is TypeOfInput.File)
-                {
-                    <InputFile OnChange="(e)=>Upload(e,item)" multiple />
-
-                }
+                </div>
             </div>
         </div>
+
+
+
+
+
     }
 
 
 
 </div>
-<div class="col-12">
-    <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width:170px;font-size: large;" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
-    <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="max-width: 170px;font-size: large;" @onclick="Clear">@basicResource["Clear"]</button>
+<div class="AddClearpositon col-12">
+    <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style=" border-left:double; max-width:150px;font-size:medium;" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
+    <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="  border-left:double;  max-width: 150px;font-size: medium;" @onclick="Clear">@basicResource["Clear"]</button>
 </div> 

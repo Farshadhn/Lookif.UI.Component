@@ -1,0 +1,34 @@
+﻿@namespace Lookif.UI.Component.Crud.CrudComponent.V2
+@using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
+@using Lookif.UI.Component.Grids.V2
+@typeparam TItem
+@typeparam TSelectItem
+
+@using System.Globalization
+@using Microsoft.Extensions.Localization;
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
+@{
+    var relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+
+}
+<div class="PatialContent PF">
+
+
+    <div class="PatialContentTitle">
+        <div>
+
+            @basicResource["GridTitle"]  @FormName 
+        </div>
+        <div class="PatialContentInsertNew" @onclick="InsertNew">
+
+            @basicResource["InsertNew"]
+            <i class="fas fa-plus-square">
+
+            </i>
+
+        </div>
+    </div>
+
+    <GridView DeleteBtn="DeleteBtn" TSelectItem="TSelectItem" TItem="TItem" FormName="@FormName" Records="@Records" OnFinished="Bind" Resource="Resource" OnDeleteFinished="OnDeleteFinished"></GridView>
+</div>

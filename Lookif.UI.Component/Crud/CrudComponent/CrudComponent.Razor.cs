@@ -27,12 +27,15 @@ namespace Lookif.UI.Component.Crud.CrudComponent
         public string FormName { get; set; }
         [Parameter]
         public IStringLocalizer Resource { get; set; }
-        protected override async Task OnInitializedAsync()
+        protected async override Task OnAfterRenderAsync(bool firstRender)
         {
-            await base.OnInitializedAsync();
-            await Bind();
+            if (firstRender)
+                await Bind();
+            await base.OnAfterRenderAsync(firstRender);
+
 
         }
+
         private async Task Bind(string inserted = default)
         {
             var dataObj = await Http.GetAsync($"{ModelName}/Get");

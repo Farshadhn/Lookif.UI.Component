@@ -150,6 +150,9 @@
   <data name="Edit" xml:space="preserve">
     <value>ویرایش</value>
   </data>
+  <data name="Event" xml:space="preserve">
+    <value />
+  </data>
   <data name="Filter" xml:space="preserve">
     <value>فیلترها</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="Insert" xml:space="preserve">
     <value>وارد کردن</value>
+  </data>
+  <data name="InsertNew" xml:space="preserve">
+    <value>افزودن</value>
   </data>
   <data name="NO" xml:space="preserve">
     <value>خیر</value>

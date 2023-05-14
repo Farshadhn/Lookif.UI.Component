@@ -2,6 +2,6 @@
 
 public sealed class RequestedModel
 {
-    public string  ModelName { get; set; }
-    public string  FunctionToCall { get; set; } 
+    public string ModelName { get; set; }
+    public string FunctionToCall { get; set; } 
 }

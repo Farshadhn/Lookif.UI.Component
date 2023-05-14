@@ -43,12 +43,15 @@ namespace Lookif.UI.Component.Date.DateTimePickers
         {
             get => selectedDay;
             set
-            { 
+            {
+                Console.WriteLine(value);
+                Console.WriteLine(SelectedDay);
 
                 if (value == selectedDay)
                     return;
                 selectedDay = value;
-                ValueChanged.InvokeAsync(Latest); 
+                ValueChanged.InvokeAsync(Latest);
+                Console.WriteLine(SelectedDay);
             }
 
         }
@@ -90,7 +93,10 @@ namespace Lookif.UI.Component.Date.DateTimePickers
 
             Value = DateTime.ParseExact($"{selectedYear}-{selectedMonth}-{selectedDay}", "yyyy-M-d", new CultureInfo("en-US"));
            
-          
+            Console.WriteLine(Value);
+            Console.WriteLine(Value.Year);
+            Console.WriteLine(Value.Month);
+            Console.WriteLine(Value.Day);
    
           
             Calendar myCal = CultureInfo.InvariantCulture.Calendar;

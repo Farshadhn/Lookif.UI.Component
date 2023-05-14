@@ -3,10 +3,15 @@
 
 
 @using System.Globalization
-@using Microsoft.Extensions.Localization;
-@using Microsoft.Extensions.Localization;
+@using Microsoft.Extensions.Localization; 
 @using Lookif.UI.Component.Resources
 @inject IStringLocalizer<Resource> basicResource
+<style>
+    .modalSize
+    {
+    width:50vw
+    }
+</style>
 @if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
 {
 
@@ -47,7 +52,7 @@ else
 
 
 
-<div class="IranSansBold ChangeDirection" style="width: 80vw;">
+<div class="IranSansBold ChangeDirection modalSize PF">
 
     <Form Dto="@MyTItem" Key="@MyKey" OnFinished="MyOnFinished" Resource="Resource"></Form>
 

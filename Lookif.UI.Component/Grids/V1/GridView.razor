@@ -1,0 +1,238 @@
+﻿@namespace Lookif.UI.Component.Grids.V1
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+@using Lookif.UI.Component.Attributes
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.Extensions.Localization;
+@using Blazored.Modal
+@using Blazored.Modal.Services
+@using Lookif.UI.Component.Components.SeparatedComponents
+@using System.Globalization
+@using Lookif.UI.Component.Resources
+@inject IStringLocalizer<Resource> basicResource
+@using static Newtonsoft.Json.JsonConvert;
+@typeparam TSelectItem
+@typeparam TItem
+@{
+    relatedSource = ((IStringLocalizer)Resource)?.GetAllStrings()?.ToList();
+    commonResource = ((IStringLocalizer)basicResource)?.GetAllStrings()?.ToList();
+
+}
+
+
+
+@if (!CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
+{
+
+
+    <style>
+        .myGridView {
+            text-align: left;
+            direction: ltr;
+            text-align-last: left;
+        }
+
+            .myGridView th {
+                text-align-last: left;
+            }
+
+            .myGridView tr {
+                text-align-last: left;
+            }
+    </style>
+}
+else
+{
+    <style>
+        .myGridView {
+            text-align-last: right;
+            text-align: right;
+            direction: rtl;
+        }
+
+            .myGridView th {
+                text-align-last: right;
+            }
+
+            .myGridView tr {
+                text-align-last: right;
+            }
+            .myGridView tr td {
+                text-align-last: right;
+            }
+    </style>
+}
+
+<div class="col-12 card myGridView" style="overflow-x: scroll;">
+
+    <table class="table table-hover table-responsive">
+        <thead>
+            <tr style="background-color: gainsboro;">
+                <th style=' width:5vw;'>@basicResource["Filter"]</th>
+                @{
+                    foreach (var item in PropertiesInformation)
+                    {
+                        if (item.Key || item.PropertyName == "Id") //we Dont want to show Id
+                            continue;
+
+                        //text - align - last: center;
+                        //<th style=' min-width: 5vw;'>
+                        <th style=' width: @item.Width;'>
+                            <span class="LH" style="vertical-align: middle;">
+                                @{
+                                    if (relatedSource is null) // When there is no source file
+                                    {
+                                        if (@item.Displayname is null) // when there is no displayName
+                                        {
+                                            @item.PropertyName
+                                        }
+                                        else
+                                        {
+                                            @item.Displayname
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
+                                        if (value == "")
+                                        {
+                                            @item.PropertyName
+                                        }
+                                        else
+                                        {
+                                            @value
+                                        }
+
+                                    }
+                                }
+
+                            </span>
+                            @*<div>
+                    <span style="vertical-align: middle;cursor: pointer" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Asc)"></span>
+                    <span style="vertical-align: middle; cursor: pointer;transform: rotate(180deg);" class="oi oi-sort-ascending" @onclick="() => Sort(item.PropertyName, SortOrder.Desc)"></span>
+                    </div>*@
+                            <div>
+                                <input class="LH" type="text" @bind="item.Value" style="width: 90%;" @onkeyup="Search" />
+                            </div>
+                        </th>
+                    }
+                }
+
+
+            </tr>
+        </thead>
+        @if (PagedRecords is null || !PagedRecords.Any())
+        {
+            <tr>
+                <td colspan="@PropertiesInformation.Count()">
+                    <p>@basicResource["NoRecord"]</p>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var record in PagedRecords)
+            {
+
+                <tr>
+
+                    @{
+                        var Id = record.FirstOrDefault(x => x.ObjectName == "Id")?.ObjectValue;
+
+                         <td>
+                         
+
+                            @if (EditBtn)
+                            {
+                                <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
+
+                            }
+                            @if (DeleteBtn)
+                            {
+                                <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
+
+                            }
+
+
+                        </td>
+                        @foreach (var item in record)
+                        {
+
+                            if (item.ObjectName != "Id")
+                            {
+
+                                <td class="LH" style="vertical-align: middle;" align="justify">
+
+                                    @(DateTime.TryParse(@item.ObjectValue,out DateTime date)?(date == DateTime.MinValue?"-": date.Date.ToString("yyyy/MM/dd")):@item.ObjectValue)
+                                </td>
+                            }
+                        }
+                        
+                       
+                    }
+                </tr>
+            }   }
+    </table>
+
+    <div class="row">
+        <div class="col-3">
+
+            <span>
+                @basicResource["Total"]:
+
+                @FilteredRecords!.Count
+
+            </span>
+            ||
+            <span>
+                @basicResource["PageNumber"]:
+                @CurrentPage
+                @basicResource["From"]
+                @((int)Math.Ceiling((double)FilteredRecords!.Count / Count))
+            </span>
+
+        </div>
+        <div class="col-4">
+
+            @if (!(PagedRecords is null || !PagedRecords.Any()))
+            {
+
+                <div class="d-flex  justify-content-center">
+                    @{
+                        try
+                        {
+
+                            int pages = (int)Math.Ceiling((double)FilteredRecords!.Count / Count);
+
+                            var firstPage = (CurrentPage > 5) ? CurrentPage - 4 : 1;
+                            var lastPage = (CurrentPage + 5 > pages) ? pages : CurrentPage + 5;
+                            for (int i = firstPage; i <= lastPage; i++)
+                            {
+                                int y = i;
+                                <div style="cursor: pointer;border-radius:0px;background-color:@(y == CurrentPage ?"lightblue":"lightgray")" class="pd-2 btn" @onclick="() => ChangePage(y)">@i</div>
+                            }
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+
+                    }
+
+                </div>
+            }
+        </div>
+        <div class="col-3">
+            <span>
+                @basicResource["NumerOfRecordsInAPage"]
+
+            </span>
+            <select @bind="Count">
+
+
+                <option value="100">100</option>
+
+            </select>
+        </div>
+    </div>
+</div>

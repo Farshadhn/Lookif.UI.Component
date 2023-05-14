@@ -78,6 +78,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                                                             Encoding.UTF8,
                                                             "application/Json");
                 using var response = await Http.SendAsync(request, new CancellationTokenSource(100000).Token);
+                var resInStreing = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
                     var resInString = await response.Content.ReadAsStringAsync();
@@ -123,8 +124,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
               
             string notificationText;
             string notificationHeaderText;
-           
-            //   return;
+            
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -193,27 +193,35 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     var IsItCollection = item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown || item.Type == TypeOfInput.Enum;
                     var IsItDateTime = (targetType == typeof(DateTime) || targetType == typeof(DateTime?));
                     var IsItBoolean = (targetType == typeof(Boolean) || targetType == typeof(Boolean?));
-                     
+
+                    Console.WriteLine(SerializeObject(item.Name));
+                    Console.WriteLine(SerializeObject(item.Type));
                     if (IsItCollection)
-                    { 
+                    {
+                        Console.WriteLine("IsItCollection"); 
                         ConvertCollection(insertOrUpdate, item, prop, targetType);
                     }
                     else if (IsItDateTime)
-                    { 
+                    {
+                        Console.WriteLine("IsItDateTime"); 
                         ConvertDateTime(insertOrUpdate, item, prop);
                     }
                     else if (IsItBoolean)
-                    { 
+                    {
+                        Console.WriteLine("IsItBoolean"); 
                         ConvertBoolean(insertOrUpdate, item, prop);
                     }
                     else
-                    { 
+                    {
+                        Console.WriteLine("other"); 
                         ConvertOtherValues(insertOrUpdate, item, prop, targetType);
                     }
                   
                 }
                 catch (Exception ex)
-                { 
+                {
+                    Console.WriteLine("converrrrrrrrrrrrrrrrrrrt33");
+                    Console.WriteLine(ex.Message);
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
                     var error = basicResource["InputError"].Value;
                     toastService.ShowError($"{error} :  -'{rs}'-Detail:'{ex.Message}'", basicResource["InputErrorHeader"].Value);
@@ -224,18 +232,29 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
       
 
         }
+ 
         private void ConvertOtherValues(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
         {
             var convertedValue = default(object);
+            var converter = TypeDescriptor.GetConverter(targetType);
             if (string.IsNullOrEmpty(item?.Value))
                 convertedValue = null;
+            
             else
-                convertedValue = TypeDescriptor.GetConverter(targetType).ConvertFromInvariantString(item?.Value);
+            {
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    // convertedValue = converter.ConvertFromInvariantString(item?.Value); //ToDo Check Why we needed ConvertFromInvariantString
+                    convertedValue = converter.ConvertFromString(item?.Value);
+                }
+                   
+            }
             prop.SetValue(insertOrUpdate, convertedValue, null);
         }
 
         private void ConvertDateTime(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
-        { 
+        {
+            Console.WriteLine(SerializeObject(item.DateTime));
             prop.SetValue(insertOrUpdate, item.DateTime, null);
         }
         private void ConvertBoolean(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop)
@@ -283,7 +302,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             return true;
         }
         private void ConvertCollection(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
-        { 
+        {
+            //Console.WriteLine(item.Value);
+            //Console.WriteLine(SerializeObject(item.ValueColection));
+            //Console.WriteLine(SerializeObject(item.ValueColection.FirstOrDefault()));
+            //Console.WriteLine(SerializeObject(item.Type));
+            //Console.WriteLine(SerializeObject(targetType.FullName));
             var convertedValue = default(object);
   
             if (item.ValueColection is not null && item.ValueColection.FirstOrDefault() is not null)
@@ -295,12 +319,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     _ => null
                 };
             else
-                convertedValue = null; 
+                convertedValue = null;
+            Console.WriteLine(SerializeObject(convertedValue));
+            Console.WriteLine("Done");
             prop.SetValue(insertOrUpdate, convertedValue, null);
         }
         private object GetList(IEnumerable<object> valueColection, Type type)
         {
-            //we need to convert everything 
+            //we need to convert everything
+            Console.WriteLine("چندتایی دارپ داون");
+            Console.WriteLine(SerializeObject(valueColection));
             try
             {
                 if (type == typeof(Guid))
@@ -309,7 +337,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            } 
+            }
+
+            Console.WriteLine("چندتایی دارپ 2");
             return valueColection;
         }
         #endregion 
@@ -353,7 +383,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
         private async Task Edit(string id)
-        { 
+        {
+            Console.WriteLine(SerializeObject(id));
             var dataObj = await Http.GetAsync($"{ModelName}/Get/{id}");
             var response = await dataObj.Content.ReadAsStringAsync();
             var generic = typeof(ApiResult<>);
@@ -380,12 +411,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 {
 
                     var desiredData = prop.GetValue(data, null)!; 
-                    item!.ValueColection = new List<object>() { desiredData };
+                    item!.ValueColection = new List<string>() { desiredData.ToString() };
                 } 
                 else if (item.Type is TypeOfInput.MultipleSelectedDropDown)
                 {
                     var desiredData = prop.GetValue(data, null)!;
-                    item!.ValueColection = ((IEnumerable)desiredData).Cast<object>().ToList();
+                    item!.ValueColection = ((IEnumerable)desiredData).Cast<string>().ToList();
 
                 }
                 else
@@ -674,7 +705,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
         public string Name { get; set; }
         public string Value { get; set; } = "";
-        public List<object> ValueColection { get; set; } // This is for Dropdowns
+        public List<string> ValueColection { get; set; } // This is for Dropdowns
         public string DisplayName { get; set; }
         public List<RelatedTo> Collection { get; set; }
         public TypeOfInput Type { get; set; } = TypeOfInput.Text;
