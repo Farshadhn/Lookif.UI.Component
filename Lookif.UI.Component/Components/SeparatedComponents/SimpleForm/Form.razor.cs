@@ -112,19 +112,19 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     return;
             }
             object insertOrUpdate = Activator.CreateInstance(Dto);
-            
-         
+
+
             ConvertWholeObject(ref insertOrUpdate);
-                    var returnStr = String.Empty;
-          
-           
-            if (!CheckRequiedItems(insertOrUpdate))   
+            var returnStr = String.Empty;
+
+
+            if (!CheckRequiedItems(insertOrUpdate))
                 return;
-            
-              
+
+
             string notificationText;
             string notificationHeaderText;
-            
+
             if (Key == default)
             {
                 var responseMessage = await Http.PostAsJsonAsync($"{ModelName}/create", insertOrUpdate);
@@ -189,7 +189,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var targetType = prop.PropertyType;
                 try
                 {
-                   
+
                     var IsItCollection = item.Type == TypeOfInput.MultipleSelectedDropDown || item.Type == TypeOfInput.DropDown || item.Type == TypeOfInput.Enum;
                     var IsItDateTime = (targetType == typeof(DateTime) || targetType == typeof(DateTime?));
                     var IsItBoolean = (targetType == typeof(Boolean) || targetType == typeof(Boolean?));
@@ -198,25 +198,25 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     Console.WriteLine(SerializeObject(item.Type));
                     if (IsItCollection)
                     {
-                        Console.WriteLine("IsItCollection"); 
+                        Console.WriteLine("IsItCollection");
                         ConvertCollection(insertOrUpdate, item, prop, targetType);
                     }
                     else if (IsItDateTime)
                     {
-                        Console.WriteLine("IsItDateTime"); 
+                        Console.WriteLine("IsItDateTime");
                         ConvertDateTime(insertOrUpdate, item, prop);
                     }
                     else if (IsItBoolean)
                     {
-                        Console.WriteLine("IsItBoolean"); 
+                        Console.WriteLine("IsItBoolean");
                         ConvertBoolean(insertOrUpdate, item, prop);
                     }
                     else
                     {
-                        Console.WriteLine("other"); 
+                        Console.WriteLine("other");
                         ConvertOtherValues(insertOrUpdate, item, prop, targetType);
                     }
-                  
+
                 }
                 catch (Exception ex)
                 {
@@ -229,17 +229,17 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
 
             }
-      
+
 
         }
- 
+
         private void ConvertOtherValues(object insertOrUpdate, ItemsOfClass item, PropertyInfo prop, Type targetType)
         {
             var convertedValue = default(object);
             var converter = TypeDescriptor.GetConverter(targetType);
             if (string.IsNullOrEmpty(item?.Value))
                 convertedValue = null;
-            
+
             else
             {
                 if (converter.CanConvertFrom(typeof(string)))
@@ -247,7 +247,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     // convertedValue = converter.ConvertFromInvariantString(item?.Value); //ToDo Check Why we needed ConvertFromInvariantString
                     convertedValue = converter.ConvertFromString(item?.Value);
                 }
-                   
+
             }
             prop.SetValue(insertOrUpdate, convertedValue, null);
         }
@@ -309,13 +309,13 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             //Console.WriteLine(SerializeObject(item.Type));
             //Console.WriteLine(SerializeObject(targetType.FullName));
             var convertedValue = default(object);
-  
+
             if (item.ValueColection is not null && item.ValueColection.FirstOrDefault() is not null)
-                convertedValue =  item.Type  switch
+                convertedValue = item.Type switch
                 {
-                     TypeOfInput.DropDown or TypeOfInput.Enum   =>
-                      TypeDescriptor.GetConverter(targetType).ConvertFrom(item.ValueColection.FirstOrDefault().ToString()),
-                     TypeOfInput.MultipleSelectedDropDown  => GetList(item.ValueColection, targetType.GetGenericArguments()[0]),
+                    TypeOfInput.DropDown or TypeOfInput.Enum =>
+                     TypeDescriptor.GetConverter(targetType).ConvertFrom(item.ValueColection.FirstOrDefault().ToString()),
+                    TypeOfInput.MultipleSelectedDropDown => GetList(item.ValueColection, targetType.GetGenericArguments()[0]),
                     _ => null
                 };
             else
@@ -397,7 +397,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
             foreach (var item in ItemsOfClasses)
             {
-                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance); 
+                PropertyInfo prop = data.GetType().GetProperty(item.Name, BindingFlags.Public | BindingFlags.Instance);
                 if (prop?.PropertyType == typeof(DateTime))
                 {
                     item!.DateTime = (DateTime)prop.GetValue(data, null)!;
@@ -410,13 +410,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
                 {
 
-                    var desiredData = prop.GetValue(data, null)!; 
+                    var desiredData = prop.GetValue(data, null)!;
                     item!.ValueColection = new List<string>() { desiredData.ToString() };
-                } 
+                }
                 else if (item.Type is TypeOfInput.MultipleSelectedDropDown)
                 {
                     var desiredData = prop.GetValue(data, null)!;
-                    item!.ValueColection = ((IEnumerable)desiredData).Cast<string>().ToList();
+                    if (desiredData is List<Guid>)
+                        item!.ValueColection = ((List<Guid>)desiredData).Select(x => x.ToString()).ToList();
+                    else
+                        item!.ValueColection = ((IEnumerable)desiredData).Cast<string>().ToList();
 
                 }
                 else

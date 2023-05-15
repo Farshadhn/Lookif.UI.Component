@@ -260,9 +260,9 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
 
 
     }
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
 
+    protected async override Task OnParametersSetAsync()
+    {
         ConvertedRecords = ConvertInputToListOfValuePlaceHolders();
         if (ConvertedRecords is not null)
         {
@@ -270,14 +270,22 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
             PagedRecords = FilteredRecords.Take(Count).ToList();
 
         }
-        ConvertedRecords = (Records is null || Records == default || !Records.Any()) ? await Bind() : ConvertedRecords;
-        if (ConvertedRecords is null)
-            return;
+        await base.OnParametersSetAsync();
+    }
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
 
-        FilteredRecords = ConvertedRecords;
+        if (firstRender)
+        {
+            ConvertedRecords = (Records is null || Records == default || !Records.Any()) ? await Bind() : ConvertedRecords;
+            if (ConvertedRecords is null)
+                return;
 
-        PagedRecords = FilteredRecords.Take(Count).ToList();
-        StateHasChanged();
+            FilteredRecords = ConvertedRecords;
+
+            PagedRecords = FilteredRecords.Take(Count).ToList();
+        }
+       
 
         await base.OnAfterRenderAsync(firstRender);
     }

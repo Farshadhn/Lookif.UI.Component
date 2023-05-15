@@ -37,7 +37,7 @@ public partial class CrudComponent<TItem, TSelectItem>
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        //if(firstRender)
             await Bind();
         await base.OnAfterRenderAsync(firstRender);
        
