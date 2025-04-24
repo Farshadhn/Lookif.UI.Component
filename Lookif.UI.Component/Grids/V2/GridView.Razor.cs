@@ -78,10 +78,10 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
                         var prop = input.GetType().GetProperty(item.PropertyName);
                         vph.ObjectName = item.PropertyName;
                         vph.ObjectDisplayName = item.Displayname;
+                        var inputType = prop.GetCustomAttribute<InputTypeAttribute>();
 
                         if (item.TypeOfObject == typeof(DateTime))
                         {
-
                             DateTime a = (DateTime)Convert.ChangeType(prop.GetValue(input, null), typeof(DateTime))!;
                             vph.ObjectValue = a.ToString("yyyy/MM/dd");
 
@@ -94,7 +94,8 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
                         }
                         else
                         {
-                            Console.WriteLine(vph.ObjectName);
+                            var displayType = inputType is null ? DisplayType.Text : inputType.InputTypeEnum switch { InputTypeEnum.Text => DisplayType.Text, InputTypeEnum.Color => DisplayType.Color, _ => DisplayType.Text };
+                            vph.ObjectDisplayType = displayType;
                             vph.ObjectValue = prop.GetValue(input, null)?.ToString();
 
                         }
@@ -186,9 +187,9 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
 
     #region ...Definition...
 
-    private List<List<ValuePlaceHolder>> FilteredRecords { get; set; } = new List<List<ValuePlaceHolder>>();
-    private List<List<ValuePlaceHolder>> PagedRecords { get; set; }
-    internal List<PropertyInformation> PropertiesInformation { get; set; }
+    private List<List<ValuePlaceHolder>> FilteredRecords { get; set; } = [];
+    private List<List<ValuePlaceHolder>> PagedRecords { get; set; } = [];
+    internal List<PropertyInformation> PropertiesInformation { get; set; } = [];
     private int CurrentPage { get; set; } = 1;
     public int Count
     {
@@ -246,7 +247,7 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
             return;
         await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
-        toastService.ShowError(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
+        toastService.ShowError(basicResource["DoneDeleted"].Value);
         await OnDeleteFinished.InvokeAsync(Id);
 
 
@@ -255,28 +256,26 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
     {
 
 
+        ConvertedRecords = ConvertInputToListOfValuePlaceHolders();
+        if (ConvertedRecords is null)
+        {
+            await base.SetParametersAsync(parameters);
+            return;
+        }
 
+        FilteredRecords = ConvertedRecords;
+        PagedRecords = FilteredRecords.Take(Count).ToList();
         await base.SetParametersAsync(parameters);
 
 
     }
 
-    protected async override Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ConvertedRecords = ConvertInputToListOfValuePlaceHolders();
-        if (ConvertedRecords is not null)
-        {
-            FilteredRecords = ConvertedRecords;
-            PagedRecords = FilteredRecords.Take(Count).ToList();
-
-        }
-        await base.OnParametersSetAsync();
-    }
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-
         if (firstRender)
         {
+            FilteredRecords = new List<List<ValuePlaceHolder>>();
+
             ConvertedRecords = (Records is null || Records == default || !Records.Any()) ? await Bind() : ConvertedRecords;
             if (ConvertedRecords is null)
                 return;
@@ -284,12 +283,21 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
             FilteredRecords = ConvertedRecords;
 
             PagedRecords = FilteredRecords.Take(Count).ToList();
+            StateHasChanged();
         }
-       
-
-        await base.OnAfterRenderAsync(firstRender);
     }
 
+
+
+
+    protected async override Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+
+
+
+    }
 
     async Task Edit(string id)
     {

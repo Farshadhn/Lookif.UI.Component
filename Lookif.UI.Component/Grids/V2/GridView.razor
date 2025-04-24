@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Reflection
 @using Lookif.UI.Component.Attributes
+@using Lookif.UI.Component.Icons
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.Localization;
 @using Blazored.Modal
@@ -21,55 +22,12 @@
 
 
 
-@if (!CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
-{
-
-
-    <style>
-        .myGridView {
-            text-align: left;
-            direction: ltr;
-            text-align-last: left;
-        }
-
-            .myGridView th {
-                text-align-last: left;
-            }
-
-            .myGridView tr {
-                text-align-last: left;
-            }
-    </style>
-}
-else
-{
-    <style>
-        .myGridView {
-            text-align-last: right;
-            text-align: right;
-            direction: rtl;
-        }
-
-            .myGridView th {
-                text-align-last: right;
-            }
-
-            .myGridView tr {
-                text-align-last: right;
-            }
-
-                .myGridView tr td {
-                    text-align-last: right;
-                }
-    </style>
-}
-
-<div class="col-12 card myGridView" style="overflow-x: scroll;">
+<div>
 
     <table class="table table-striped table-hover table-responsive">
         <thead>
             <tr>
-                 
+
                 @{
                     foreach (var item in PropertiesInformation)
                     {
@@ -139,7 +97,7 @@ else
                         @{
                             var Id = record.FirstOrDefault(x => x.ObjectName == "Id")?.ObjectValue;
 
-                          
+
                             @foreach (var item in record)
                             {
 
@@ -148,22 +106,38 @@ else
 
                                     <td class="LH" style="vertical-align: middle;" align="justify">
 
-                                        @(DateTime.TryParse(@item.ObjectValue, out DateTime date) ? (date == DateTime.MinValue ? "-" : date.Date.ToString("yyyy/MM/dd")) : @item.ObjectValue)
+                                        @if (item.ObjectDisplayType == DisplayType.Color)
+                                        {
+
+                                            <div style="width: 50px; height: 20px; background-color: @item.ObjectValue; border: 1px solid #000;"></div>
+
+                                        }
+                                        else
+                                        {
+                                            @(DateTime.TryParse(@item.ObjectValue, out DateTime date) ? (date == DateTime.MinValue ? "-" : date.Date.ToString("yyyy/MM/dd")) : @item.ObjectValue)
+
+                                        }
+
                                     </td>
                                 }
                             }
-
                             <td>
 
 
                                 @if (EditBtn)
                                 {
-                                    <i class="far fa-edit p-2" style="cursor:pointer;color:green" @onclick="() => Edit(Id) "></i>
+                                    <span style="cursor:pointer;color:green" @onclick="() => Edit(Id) ">
+                                        <Edit />
+                                    </span>
+
+
 
                                 }
                                 @if (DeleteBtn)
                                 {
-                                    <i class="far fa-trash-alt p-2 " style="cursor:pointer;color:red" @onclick='() => Delete(Id)'></i>
+                                    <span style="cursor:pointer;color:red" @onclick='() => Delete(Id)'>
+                                        <Delete />
+                                    </span>
 
                                 }
 

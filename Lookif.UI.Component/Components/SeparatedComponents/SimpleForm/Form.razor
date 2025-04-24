@@ -87,6 +87,10 @@
                         <LFDateTimePicker ValueChanged="newValue => item.DateTime = newValue" Value="item.DateTime"></LFDateTimePicker>
 
                     }
+                    else if (item.Type is TypeOfInput.ColorPicker)
+                    {
+                        <input class="LH" type="color" @bind="item.Value"   />
+                    }
                     else if (item.Type is TypeOfInput.CheckBox)
                     {
                         if (item.Valuebool)
@@ -118,6 +122,6 @@
 
 </div>
 <div class="AddClearpositon col-12">
-    <button class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style=" border-left:double; max-width:150px;font-size:medium;" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</button>
+    <div class="btn btn-success col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style=" border-left:double; max-width:150px;font-size:medium;" @onclick="Add">@(Key == default ? @basicResource["Add"]: @basicResource["Edit"])</div>
     <button class="btn btn-warning col-2  mt-md-4 mb-md-4 mt-sm-1 mb-sm-1" style="  border-left:double;  max-width: 150px;font-size: medium;" @onclick="Clear">@basicResource["Clear"]</button>
 </div> 

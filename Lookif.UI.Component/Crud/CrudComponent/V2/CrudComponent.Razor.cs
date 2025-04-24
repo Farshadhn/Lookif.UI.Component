@@ -35,16 +35,20 @@ public partial class CrudComponent<TItem, TSelectItem>
 
     [CascadingParameter] public IModalService Modal { get; set; }
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
+
+    protected override async Task OnParametersSetAsync()
     {
-        //if(firstRender)
+          await base.OnParametersSetAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) {
+            await base.OnAfterRenderAsync(firstRender);
             await Bind();
-        await base.OnAfterRenderAsync(firstRender);
-       
+        }
 
     }
-
-  
+ 
     private async Task Bind(string inserted = default)
     {
         var dataObj = await Http.GetAsync($"{ModelName}/Get");

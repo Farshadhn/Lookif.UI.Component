@@ -21,11 +21,10 @@ using Microsoft.AspNetCore.Components.Forms;
 using System.IO;
 using Lookif.Library.Common.CommonModels;
 using System.Collections;
-using util = Lookif.Library.Common.Utilities;
 using Lookif.Library.Common.Utilities;
-using Lookif.Library.Common.Exceptions;
 using Lookif.UI.Component.Models;
 using System.Text;
+using Blazored.Toast.Configuration;
 
 namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 {
@@ -62,22 +61,21 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 await Init();
                 if (Key != default)
                     await Edit(Key);
-                await FillAllDropDownsTogether();
+                await FillAllDropDownsTogether(_requestedModels);
                 ready = true;
                 StateHasChanged();
             }
         }
 
-        private async Task FillAllDropDownsTogether()
+        private async Task FillAllDropDownsTogether(List<RequestedModel> requestedModels)
         {
-            if (_requestedModels is { Count: > 0 })
+            if (requestedModels is { Count: > 0 })
             {
-                HttpRequestMessage request = new(HttpMethod.Post, "RequestedModel/RequestedModel");
 
-                request.Content = new StringContent(SerializeObject(_requestedModels),
+                var cnt = new StringContent(SerializeObject(requestedModels),
                                                             Encoding.UTF8,
                                                             "application/Json");
-                using var response = await Http.SendAsync(request, new CancellationTokenSource(100000).Token);
+                using var response = await Http.PostAsync($"RequestedModel/RequestedModel", cnt, new CancellationTokenSource(100000).Token);
                 var resInStreing = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -102,7 +100,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// Add Or Create New
         /// </summary>  
         /// <returns></returns>
-        private async Task Add()
+        public async Task Add()
         {
             if (Key != default)
             {
@@ -132,7 +130,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var res = DeserializeObject<ApiResult<object>>(resInString);
                 if (!res.IsSuccess)
                 {
-                    toastService.ShowError(res.Message, basicResource["InputErrorHeader"].Value);
+                    toastService.ShowError(res.Message);
                     return;
                 }
 
@@ -150,7 +148,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 if (!res.IsSuccess)
                 {
 
-                    toastService.ShowError(res.Message, basicResource["InputErrorHeader"].Value);
+                    toastService.ShowError(res.Message);
                     return;
                 }
                 notificationText = basicResource["DoneEditing"].Value;
@@ -163,7 +161,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             await Init();
 
             await OnFinished.InvokeAsync(returnStr);
-            toastService.ShowSuccess(notificationText, notificationHeaderText);
+            toastService.ShowSuccess(notificationText);
         }
 
 
@@ -224,7 +222,10 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                     Console.WriteLine(ex.Message);
                     var rs = relatedSource.Find(x => x.Name == prop.Name);
                     var error = basicResource["InputError"].Value;
-                    toastService.ShowError($"{error} :  -'{rs}'-Detail:'{ex.Message}'", basicResource["InputErrorHeader"].Value);
+
+
+                    //basicResource["InputErrorHeader"].Value
+                    toastService.ShowError($"{error} :  -'{rs}'-Detail:'{ex.Message}'");
                     return;
                 }
 
@@ -275,7 +276,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                     var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
                     errorDetail = errorDetail.Replace("{field}", name);
-                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    //basicResource["InputErrorHeader"].Value
+                    toastService.ShowError(errorDetail);
                     return false;
                 }
                 else if (value.GetType() == typeof(string) && value == default)
@@ -285,7 +287,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                     var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
                     errorDetail = errorDetail.Replace("{field}", name);
-                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+
+                    //, basicResource["InputErrorHeader"].Value
+                    toastService.ShowError(errorDetail);
                     return false;
                 }
                 else if (value.GetType() != typeof(string) && value.ToString() == Activator.CreateInstance(value.GetType()).ToString())
@@ -295,7 +299,8 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
                     var name = relatedSource.FirstOrDefault(x => x.Name == item.Name)?.Value;
                     errorDetail = errorDetail.Replace("{field}", name);
-                    toastService.ShowError(errorDetail, basicResource["InputErrorHeader"].Value);
+                    //, basicResource["InputErrorHeader"].Value
+                    toastService.ShowError(errorDetail);
                     return false;
                 }
             }
@@ -410,16 +415,21 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 else if (item.Type is TypeOfInput.DropDown or TypeOfInput.Enum)
                 {
 
+                    item.Value = "";
                     var desiredData = prop.GetValue(data, null)!;
-                    item!.ValueColection = new List<string>() { desiredData.ToString() };
+
+                    if (desiredData is not null)
+                        item!.ValueColection = new List<string>() { desiredData.ToString() };
+
+
+
+
+
                 }
                 else if (item.Type is TypeOfInput.MultipleSelectedDropDown)
                 {
                     var desiredData = prop.GetValue(data, null)!;
-                    if (desiredData is List<Guid>)
-                        item!.ValueColection = ((List<Guid>)desiredData).Select(x => x.ToString()).ToList();
-                    else
-                        item!.ValueColection = ((IEnumerable)desiredData).Cast<string>().ToList();
+                    item!.ValueColection = ((IEnumerable)desiredData).Cast<string>().ToList();
 
                 }
                 else
@@ -439,12 +449,12 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         /// <param name="propertyInfo"></param>
         /// <param name="tableNameToBeRetrieved"></param>
         /// <returns></returns>
-        private async Task<List<RelatedTo>> FillDropDown(RelatedToAttribute relatedTo, string dropdownName, CancellationToken cancellationToken)
+        private async Task<RequestedModel> FillDropDown(RelatedToAttribute relatedTo, string dropdownName, CancellationToken cancellationToken)
         {
 
-            var listOfRelatedTo = await GetRelatedTo(relatedTo, dropdownName, cancellationToken);
+            var requestedModel = await GetRelatedTo(relatedTo, dropdownName, cancellationToken);
 
-            return listOfRelatedTo;
+            return requestedModel;
 
         }
 
@@ -545,7 +555,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             catch (Exception ex)
             {
 
-                toastService.ShowError(basicResource["WarnSignForErrorUpload"].Value, ex.Message);
+                toastService.ShowError(basicResource["WarnSignForErrorUpload"].Value);
             }
 
         }
@@ -570,7 +580,6 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(100000);
             ItemsOfClasses = new List<ItemsOfClass>();
             _requestedModels = new();
-            await Task.Delay(100);
             PropertyInfo[] propertyInfos = Dto.GetProperties();
             foreach (var property in propertyInfos)
             {
@@ -589,13 +598,17 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 var file = property.GetCustomAttribute<FileAttribute>();
                 var required = property.GetCustomAttribute<RequiredAttribute>() is null ? false : true;
                 var appearance = property.GetCustomAttribute<AppearanceAttribute>() ?? new AppearanceAttribute(0, 0, 0);
+                var inputType = property.GetCustomAttribute<InputTypeAttribute>() ?? new InputTypeAttribute(InputTypeEnum.Text);
 
                 if (relatedTo is not null) // We need to retrieved and fill dropdown
                 {
 
                     if (Key != default && !string.IsNullOrEmpty(relatedTo.FunctionToCall))
                         relatedTo.FunctionToCall = $"{relatedTo.FunctionToCall}/{Key}";
-                    var list = await FillDropDown(relatedTo, property.Name, cancellationTokenSource.Token);
+                    var requestedModel = await FillDropDown(relatedTo, property.Name, cancellationTokenSource.Token);
+
+                    _requestedModels.Add(requestedModel);
+
                     ItemsOfClasses.Add(
                         new ItemsOfClass(order)
                         {
@@ -618,7 +631,22 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.File, property = property, Required = required, Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize) });
 
                     else if (property.PropertyType == typeof(String))
-                        ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.Text, Required = required, Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize) });
+                    {
+                        ItemsOfClasses.Add(new ItemsOfClass(order)
+                        {
+                            Name = property.Name,
+                            DisplayName = displayName,
+                            Type = inputType.InputTypeEnum switch
+                            {
+                                InputTypeEnum.Text => TypeOfInput.Text,
+                                InputTypeEnum.Color => TypeOfInput.ColorPicker,
+                                _ => TypeOfInput.Text
+                            },
+                            Required = required,
+                            Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize)
+                        });
+
+                    }
                     else if (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?))
                         ItemsOfClasses.Add(new ItemsOfClass(order) { Name = property.Name, DisplayName = displayName, Type = TypeOfInput.DateTime, Required = required, Appearance = new Appearance(appearance.DivSize, appearance.LabelSize, appearance.InputSize) });
                     else if (property.PropertyType == typeof(Boolean))
@@ -635,8 +663,9 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
                 }
 
             }
-            await FillAllDropDownsTogether();
+            await FillAllDropDownsTogether(_requestedModels);
             ready = true;
+            StateHasChanged();
         }
 
 
@@ -650,17 +679,16 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
         }
 
 
-        private async Task<List<RelatedTo>> GetRelatedTo(RelatedToAttribute relatedTo, string dropdownName, CancellationToken cancellationToken)
+        private async Task<RequestedModel> GetRelatedTo(RelatedToAttribute relatedTo, string dropdownName, CancellationToken cancellationToken)
         {
             var entityName = relatedTo.Name.Replace("Dto", "");
             var sendToAddress = $"{entityName}/{(string.IsNullOrEmpty(relatedTo.FunctionToCall) ? $"GetDropDown/{relatedTo.DisplayName}" : relatedTo.FunctionToCall)}";
 
-            _requestedModels.Add(new RequestedModel()
+            return new RequestedModel()
             {
                 FunctionToCall = sendToAddress,
                 ModelName = dropdownName
-            });
-            return new();
+            };
 
         }
 
@@ -677,6 +705,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
 
 
         #endregion
+
 
 
 
@@ -735,7 +764,7 @@ namespace Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
     /// </summary>
     public enum TypeOfInput
     {
-        Text, DropDown, MultipleSelectedDropDown, DateTime, CheckBox, Enum, File
+        Text, DropDown, MultipleSelectedDropDown, DateTime, CheckBox, Enum, File, ColorPicker
     }
 
 

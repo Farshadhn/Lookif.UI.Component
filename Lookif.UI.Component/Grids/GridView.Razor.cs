@@ -213,7 +213,7 @@ namespace Lookif.UI.Component.Grids
                 return;
             await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
-            toastService.ShowError(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
+            toastService.ShowError(basicResource["DoneDeleted"].Value);
             await OnDeleteFinished.InvokeAsync(Id);
 
 

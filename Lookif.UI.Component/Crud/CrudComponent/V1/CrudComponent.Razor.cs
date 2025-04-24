@@ -27,15 +27,12 @@ public partial class CrudComponent<TItem, TSelectItem>
     public string FormName { get; set; }
     [Parameter]
     public IStringLocalizer Resource { get; set; }
-   protected async override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if(firstRender)
-            await Bind();
-        await base.OnAfterRenderAsync(firstRender);
-       
+                  await base.OnInitializedAsync();
+        await Bind();
 
     }
-
     private async Task Bind(string inserted = default)
     {
         var dataObj = await Http.GetAsync($"{ModelName}/Get");

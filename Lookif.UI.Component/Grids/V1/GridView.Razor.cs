@@ -246,7 +246,7 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
             return;
         await Http.DeleteAsync($"{ModelName}/Delete/{Id}");
 
-        toastService.ShowError(basicResource["DoneDeleted"].Value, basicResource["DoneDeletedHeader"].Value);
+        toastService.ShowError(basicResource["DoneDeleted"].Value);
         await OnDeleteFinished.InvokeAsync(Id);
 
 

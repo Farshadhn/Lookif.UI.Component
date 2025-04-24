@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <PrivateAssets>all</PrivateAssets>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Farshad Hosseini nejad</Authors>
     <Company>Lookif</Company>
@@ -17,9 +17,9 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/Farshadhn/Lookif.UI.Component</RepositoryUrl>
-    <AssemblyVersion>3.2.0</AssemblyVersion>
-    <FileVersion>3.2.0</FileVersion>
-    <Version>3.2.0</Version>
+    <AssemblyVersion>2.4.0</AssemblyVersion>
+    <FileVersion>2.4.0</FileVersion>
+    <Version>2.4.0</Version>
   </PropertyGroup>
 
   
@@ -28,16 +28,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-    <PackageReference Include="Blazored.Modal" Version="7.1.0" />
-    <PackageReference Include="Blazored.Toast" Version="3.2.2" />
-    <PackageReference Include="Lookif.Component.Carousel" Version="1.1.0" />
-    <PackageReference Include="Lookif.Component.DateTimePicker" Version="1.0.0" />
-    <PackageReference Include="Lookif.Component.DropDown" Version="1.1.0" />
-    <PackageReference Include="Lookif.Library.Common" Version="2.2.0" />
-    <PackageReference Include="Lookif.UI.Common" Version="1.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.12" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="Blazored.Modal" Version="7.3.1" />
+    <PackageReference Include="Blazored.Toast" Version="4.2.1" />
+    <PackageReference Include="Lookif.Component.DateTimePicker" Version="2.0.0" />
+    <PackageReference Include="Lookif.Component.DropDown" Version="2.0.0" />
+    <PackageReference Include="Lookif.Library.Common" Version="3.2.0" />
+    <PackageReference Include="Lookif.UI.Common" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.13" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +52,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Icons\" />
+    <Folder Include="wwwroot\NewFolder\" />
   </ItemGroup>
 
 </Project>
