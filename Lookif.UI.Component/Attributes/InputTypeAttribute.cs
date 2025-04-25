@@ -1,4 +1,5 @@
-﻿[System.AttributeUsage(System.AttributeTargets.Property)]
+﻿namespace Lookif.UI.Component.Attributes;
+[System.AttributeUsage(System.AttributeTargets.Property)]
 public class InputTypeAttribute : System.Attribute
 {
     public InputTypeEnum InputTypeEnum { get; set; }
