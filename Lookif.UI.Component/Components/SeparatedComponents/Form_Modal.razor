@@ -1,61 +1,15 @@
 ﻿@namespace Lookif.UI.Component.Components.SeparatedComponents
 @using Lookif.UI.Component.Components.SeparatedComponents.SimpleForm
-
-
 @using System.Globalization
-@using Microsoft.Extensions.Localization; 
+@using Microsoft.Extensions.Localization
 @using Lookif.UI.Component.Resources
+
 @inject IStringLocalizer<Resource> basicResource
-<style>
-    .modalSize
-    {
-    width:50vw
-    }
-</style>
-@if (CultureInfo.CurrentCulture.TextInfo.IsRightToLeft)
-{
 
 
-
-    <style>
-        .ChangeDirection {
-            direction: rtl;
-        }
-
-        .FormAlign {
-            float: right;
-        }
-    </style>
-}
-else
-{
-    <style>
-        .FormAlign {
-            float: left;
-        }
-    </style>
-}
-<style>
-    h3 {
-        font-family: 'IranSansBold'
-    }
-
-    .blazored-modal-close span {
-        font-size: xx-large
-    }
-
-    .blazored-modal-close {
-        padding: 0 10px 0 0;
-    }
-</style>
-
-
-
-
-<div class="IranSansBold ChangeDirection modalSize PF">
-
-    <Form @rendermode="RenderMode.InteractiveServer" Dto="@MyTItem" Key="@MyKey" OnFinished="MyOnFinished" Resource="Resource"></Form>
-
-
-
-</div>
+<Form @rendermode="RenderMode.InteractiveServer"
+      Title="@Title"
+      Dto="@MyTItem"
+      Key="@MyKey"
+      OnFinished="MyOnFinished"
+      Resource="Resource" />

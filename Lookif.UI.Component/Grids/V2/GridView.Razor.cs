@@ -191,6 +191,9 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
     private List<List<ValuePlaceHolder>> PagedRecords { get; set; } = [];
     internal List<PropertyInformation> PropertiesInformation { get; set; } = [];
     private int CurrentPage { get; set; } = 1;
+    private string CurrentSortProperty { get; set; }
+    private SortOrder CurrentSortOrder { get; set; } = SortOrder.Asc;
+
     public int Count
     {
         get => _count;
@@ -230,16 +233,25 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
 
     #region  ...Events...
 
+    
+
     private async Task<bool> Confirm()
     {
+        var options = new ModalOptions()
+        {
+            Class = "size-automatic",
+            HideHeader = true,
+            Position = ModalPosition.Middle,
+            AnimationType = ModalAnimationType.FadeInOut
+        };
         var parameters = new ModalParameters();
-        parameters.Add("YES", basicResource["YES"].Value);
-        parameters.Add("NO", basicResource["NO"].Value);
-        var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters);
+        parameters.Add("ConfirmText", basicResource["YES"].Value);
+        parameters.Add("CancelText", basicResource["NO"].Value);
+        parameters.Add("Message", "آیا از حذف این مورد اطمینان دارید؟");
+        var MessageForm = Modal.Show<ConfirmModal>(basicResource["WarnSignForConfirm"].Value, parameters, options);
         var result = await MessageForm.Result;
         return !result.Cancelled;
     }
-
     private async Task Delete(string Id)
     {
         var IsItReallyOkay = await Confirm();
@@ -303,14 +315,18 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
     {
         var options = new ModalOptions()
         {
-            Class = "blazored-modal size-automatic"
+            Class = "size-automatic",
+            HideHeader = true,
+            Position = ModalPosition.Middle,
+            AnimationType = ModalAnimationType.FadeInOut
         };
         var parameters = new ModalParameters();
         parameters.Add("Key", id);
         parameters.Add("TItem", typeof(TItem));
         parameters.Add("OnFinished", OnFinished);
         parameters.Add("Resource", Resource);
-        var MessageForm = Modal.Show<Form_Modal>(basicResource["Edit"], parameters, options);
+        parameters.Add("Title", "ویرایش");
+        var MessageForm = Modal.Show<Form_Modal>("", parameters, options);
         var result = await MessageForm.Result;
 
         await OnFinished.InvokeAsync(id)!;
@@ -318,22 +334,101 @@ public partial class GridView<TSelectItem, TItem> where TItem : class
 
 
 
+    private string GetSortIconClass(string propertyName)
+    {
+        if (CurrentSortProperty != propertyName)
+            return "oi-chevron-top";
+            
+        return CurrentSortOrder == SortOrder.Asc ? "oi-chevron-top" : "oi-chevron-bottom";
+    }
+
+    private string GetSortIconActiveClass(string propertyName)
+    {
+        return CurrentSortProperty == propertyName ? "active" : "";
+    }
+
+    private void ToggleSort(string propertyName)
+    {
+        if (CurrentSortProperty == propertyName)
+        {
+            // Toggle the sort order
+            CurrentSortOrder = CurrentSortOrder == SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc;
+        }
+        else
+        {
+            // New property, start with ascending
+            CurrentSortProperty = propertyName;
+            CurrentSortOrder = SortOrder.Asc;
+        }
+
+        Sort(propertyName, CurrentSortOrder);
+    }
+
     void Sort(string propertyName, SortOrder order)
     {
-        var property = typeof(TSelectItem).GetProperty(propertyName);
-        switch (order)
-        {
-            case SortOrder.Asc when !(property is null):
-                FilteredRecords = FilteredRecords.OrderBy(x => x.Where(z => z.ObjectName == propertyName)).ToList();
-                break;
-            case SortOrder.Desc when !(property is null):
-                FilteredRecords = FilteredRecords.OrderByDescending(x => property.GetValue(x, null)).ToList();
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(order), order, null);
-        }
-        PagedRecords = FilteredRecords.Take(Count).ToList();
+        if (FilteredRecords == null || !FilteredRecords.Any())
+            return;
 
+        var property = typeof(TSelectItem).GetProperty(propertyName);
+        if (property == null)
+            return;
+
+        FilteredRecords = order switch
+        {
+            SortOrder.Asc => FilteredRecords.OrderBy(x => 
+            {
+                var value = x.FirstOrDefault(v => v.ObjectName == propertyName)?.ObjectValue;
+                return ConvertValueForSorting(value, property.PropertyType);
+            }).ToList(),
+            SortOrder.Desc => FilteredRecords.OrderByDescending(x => 
+            {
+                var value = x.FirstOrDefault(v => v.ObjectName == propertyName)?.ObjectValue;
+                return ConvertValueForSorting(value, property.PropertyType);
+            }).ToList(),
+            _ => throw new ArgumentOutOfRangeException(nameof(order), order, null)
+        };
+
+        PagedRecords = FilteredRecords.Skip((CurrentPage - 1) * Count).Take(Count).ToList();
+    }
+
+    private object ConvertValueForSorting(string value, Type targetType)
+    {
+        if (string.IsNullOrEmpty(value))
+            return null;
+
+        try
+        {
+            if (targetType == typeof(DateTime))
+            {
+                return DateTime.TryParse(value, out DateTime date) ? date : DateTime.MinValue;
+            }
+            if (targetType == typeof(int))
+            {
+                return int.TryParse(value, out int result) ? result : 0;
+            }
+            if (targetType == typeof(double))
+            {
+                return double.TryParse(value, out double result) ? result : 0.0;
+            }
+            if (targetType == typeof(decimal))
+            {
+                return decimal.TryParse(value, out decimal result) ? result : 0m;
+            }
+            if (targetType == typeof(bool))
+            {
+                return bool.TryParse(value, out bool result) ? result : false;
+            }
+            if (targetType == typeof(Guid))
+            {
+                return Guid.TryParse(value, out Guid result) ? result : Guid.Empty;
+            }
+            // For string and other types, return the value as is
+            return value;
+        }
+        catch
+        {
+            return value; // Fallback to string comparison if conversion fails
+        }
     }
 
     void Search()

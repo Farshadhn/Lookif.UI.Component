@@ -1,22 +1,124 @@
-﻿@namespace Lookif.UI.Component.Modals
+﻿@using Microsoft.AspNetCore.Components
+@using Blazored.Modal
+@using Blazored.Modal.Services
 
+@inject IModalService Modal
 
-<div style="width: 330px; text-align-last: center;">
-    <button style="width: 150px;font-size: large;" @onclick="OnCancel" class="btn btn-info">@NO</button> 
-    <button style="width: 150px;font-size: large;" @onclick="OnConfirm" class="btn btn-warning">@YES</button> 
+<div class="confirmation-content PF" dir="rtl">
+    <div class="confirmation-header">
+        <h3>@Title</h3>
+    </div>
+    <div class="confirmation-body">
+        <div class="message-icon">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <p>@Message</p>
+    </div>
+    <div class="confirmation-footer">
+        <button type="button" class="btn btn-light" @onclick="OnCancelClick">@CancelText</button>
+        <button type="button" class="btn btn-primary" @onclick="OnConfirmClick">@ConfirmText</button>
+    </div>
 </div>
 
+@code {
+    [CascadingParameter] public BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public string Title { get; set; } = "تایید";
+    [Parameter] public string Message { get; set; } = "آیا از انجام این عملیات اطمینان دارید؟";
+    [Parameter] public string ConfirmText { get; set; } = "بله";
+    [Parameter] public string CancelText { get; set; } = "خیر";
+    [Parameter] public EventCallback OnConfirm { get; set; }
 
+    private async Task OnConfirmClick()
+    {
+        await OnConfirm.InvokeAsync();
+        await ModalInstance.CloseAsync(ModalResult.Ok(true));
+    }
 
- <style>
-     h3 {
-     font-family:'IranSansBold'
-     }
-     .blazored-modal-close span{
-     font-size:xx-large
-     }
-     .blazored-modal-close 
-     {
-         padding: 0 10px 0 0;
-     }
-     </style>
+    private async Task OnCancelClick()
+    {
+        await ModalInstance.CancelAsync();
+    }
+}
+
+<style>
+    .confirmation-content {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .confirmation-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+        .confirmation-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+    .confirmation-body {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    .message-icon {
+        font-size: 3rem;
+        color: #3498db;
+        margin-bottom: 1rem;
+    }
+
+    .confirmation-body p {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #34495e;
+        line-height: 1.6;
+    }
+
+    .confirmation-footer {
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #495057;
+    }
+
+        .btn-light:hover {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+
+    .btn-primary {
+        background-color: #3498db;
+        border: none;
+        color: white;
+    }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+    .btn:focus {
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        outline: none;
+    }
+</style> 

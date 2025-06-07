@@ -1,1 +1,33 @@
-﻿
+﻿.PatialContentInsertNew {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #1a73e8;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    gap: 8px;
+}
+
+.PatialContentInsertNew:hover {
+    background-color: #1557b0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.PatialContentInsertNew svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.PatialContentTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+}

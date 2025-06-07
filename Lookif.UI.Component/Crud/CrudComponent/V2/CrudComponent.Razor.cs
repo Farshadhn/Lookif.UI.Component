@@ -76,7 +76,10 @@ public partial class CrudComponent<TItem, TSelectItem>
     {
         var options = new ModalOptions()
         {
-            Class = "blazored-modal size-automatic"
+            Class = "size-automatic",
+            HideHeader = true,
+            Position = ModalPosition.Middle,
+            AnimationType = ModalAnimationType.FadeInOut
         };
         var parameters = new ModalParameters();
 
