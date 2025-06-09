@@ -20,93 +20,93 @@
 }
 
 <div class="grid-container">
-    <div class="grid-wrapper">
-        <div class="grid-header">
-            <div class="grid-row header-row">
-                @foreach (var item in PropertiesInformation)
-                {
-                    if (item.Key || item.PropertyName == "Id")
-                        continue;
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    @foreach (var item in PropertiesInformation)
+                    {
+                        if (item.Key || item.PropertyName == "Id")
+                            continue;
 
-                    <div class="grid-cell header-cell @(GetSortIconActiveClass(item.PropertyName))" 
-                         style="min-width: @item.Width;"
-                         @onclick="() => ToggleSort(item.PropertyName)">
-                        <div class="header-content">
-                            <span class="header-text">
-                                @{
-                                    if (relatedSource is null)
+                        <th class="header-cell @(GetSortIconActiveClass(item.PropertyName))"
+                            style="min-width: @item.Width;"
+                            @onclick="() => ToggleSort(item.PropertyName)">
+                            <div class="header-content">
+                                <span class="header-text">
+                                    @{
+                                        if (relatedSource is null)
+                                        {
+                                            @(item.Displayname ?? item.PropertyName)
+                                        }
+                                        else
+                                        {
+                                            var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
+                                            @(string.IsNullOrEmpty(value) ? item.PropertyName : value)
+                                        }
+                                    }
+                                </span>
+                                <div class="sort-indicator">
+                                    <i class="oi @(GetSortIconClass(item.PropertyName))"></i>
+                                </div>
+                            </div>
+                        </th>
+                    }
+                    <th class="header-cell actions-cell">عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (PagedRecords is null || !PagedRecords.Any())
+                {
+                    <tr>
+                        <td colspan="100%" class="no-records">
+                            <p>@basicResource["NoRecord"]</p>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var record in PagedRecords)
+                    {
+                        var Id = record.FirstOrDefault(x => x.ObjectName == "Id")?.ObjectValue;
+                        <tr>
+                            @foreach (var item in record.Where(x => x.ObjectName != "Id"))
+                            {
+                                <td class="data-cell" data-label="@(relatedSource?.FirstOrDefault(x => x.Name == item.ObjectName)?.Value ?? item.ObjectName)">
+                                    @if (item.ObjectDisplayType == DisplayType.Color)
                                     {
-                                        @(item.Displayname ?? item.PropertyName)
+                                        <div class="color-preview" style="background-color: @item.ObjectValue;"></div>
                                     }
                                     else
                                     {
-                                        var value = relatedSource.FirstOrDefault(x => x.Name == @item.PropertyName)?.Value;
-                                        @(string.IsNullOrEmpty(value) ? item.PropertyName : value)
+                                        @(DateTime.TryParse(@item.ObjectValue, out DateTime date)
+                                            ? (date == DateTime.MinValue ? "-" : date.Date.ToString("yyyy/MM/dd"))
+                                            : @item.ObjectValue)
                                     }
-                                }
-                            </span>
-                            <div class="sort-indicator">
-                                <i class="oi @(GetSortIconClass(item.PropertyName))"></i>
-                            </div>
-                        </div>
-                    </div>
+                                </td>
+                            }
+                            <td class="data-cell actions-cell">
+                                <div class="action-buttons">
+                                    @if (EditBtn)
+                                    {
+                                        <button class="action-btn edit-btn" @onclick="() => Edit(Id)">
+                                            <Edit />
+                                        </button>
+                                    }
+                                    @if (DeleteBtn)
+                                    {
+                                        <button class="action-btn delete-btn" @onclick="() => Delete(Id)">
+                                            <Delete />
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
-                <div class="grid-cell header-cell actions-cell">
-                     
-                </div>
-            </div>
-        </div>
 
-        <div class="grid-body">
-            @if (PagedRecords is null || !PagedRecords.Any())
-            {
-                <div class="grid-row">
-                    <div class="grid-cell no-records">
-                        <p>@basicResource["NoRecord"]</p>
-                    </div>
-                </div>
-            }
-            else
-            {
-                @foreach (var record in PagedRecords)
-                {
-                    var Id = record.FirstOrDefault(x => x.ObjectName == "Id")?.ObjectValue;
-                    <div class="grid-row">
-                        @foreach (var item in record.Where(x => x.ObjectName != "Id"))
-                        {
-                            <div class="grid-cell" data-label="@(relatedSource?.FirstOrDefault(x => x.Name == item.ObjectName)?.Value ?? item.ObjectName)">
-                                @if (item.ObjectDisplayType == DisplayType.Color)
-                                {
-                                    <div class="color-preview" style="background-color: @item.ObjectValue;"></div>
-                                }
-                                else
-                                {
-                                    @(DateTime.TryParse(@item.ObjectValue, out DateTime date) 
-                                        ? (date == DateTime.MinValue ? "-" : date.Date.ToString("yyyy/MM/dd")) 
-                                        : @item.ObjectValue)
-                                }
-                            </div>
-                        }
-                        <div class="grid-cell actions-cell">
-                            <div class="action-buttons">
-                                @if (EditBtn)
-                                {
-                                    <button class="action-btn edit-btn" @onclick="() => Edit(Id)">
-                                        <Edit />
-                                    </button>
-                                }
-                                @if (DeleteBtn)
-                                {
-                                    <button class="action-btn delete-btn" @onclick="() => Delete(Id)">
-                                        <Delete />
-                                    </button>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
+            </tbody>
+        </table>
     </div>
 
     <div class="grid-footer">
@@ -167,4 +167,387 @@
     </div>
 </div>
 
- 
+<style>
+    .grid-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 1;
+        }
+
+    .header-cell {
+        padding: 12px 16px;
+        background: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+    }
+
+        .header-cell:hover {
+            background: #e9ecef;
+        }
+
+        .header-cell.active {
+            background: #e7f1ff;
+            border-bottom-color: #007bff;
+        }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .header-text {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .sort-indicator {
+        display: flex;
+        align-items: center;
+        color: #adb5bd;
+        font-size: 0.8em;
+        transition: all 0.2s ease;
+        opacity: 0.5;
+    }
+
+    .header-cell:hover .sort-indicator {
+        opacity: 1;
+    }
+
+    .header-cell.active .sort-indicator {
+        color: #007bff;
+        opacity: 1;
+    }
+
+    .sort-indicator i {
+        transition: transform 0.2s ease;
+    }
+
+    .header-cell.active .sort-indicator i {
+        transform: scale(1.2);
+    }
+
+    .data-cell {
+        padding: 12px 16px;
+        border-bottom: 1px solid #dee2e6;
+        background: #fff;
+        vertical-align: middle;
+    }
+
+    .actions-cell {
+        position: sticky;
+        right: 0;
+        background: #fff;
+        z-index: 1;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .header-cell.actions-cell {
+        position: sticky;
+        right: 0;
+        background: #f8f9fa;
+        z-index: 2;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .edit-btn {
+        color: #28a745;
+    }
+
+    .delete-btn {
+        color: #dc3545;
+    }
+
+    .action-btn:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .color-preview {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .grid-footer {
+        padding: 16px;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .footer-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .records-info {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .separator {
+        color: #6c757d;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-btn {
+        padding: 6px 12px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .page-btn:hover {
+            background: #e9ecef;
+        }
+
+        .page-btn.active {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+    .page-ellipsis {
+        color: #6c757d;
+    }
+
+    .page-size-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-size-select {
+        padding: 4px 8px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+    .no-records {
+        text-align: center;
+        color: #6c757d;
+        padding: 24px;
+    }
+
+    @@media (max-width: 768px) {
+        .data-cell, .header-cell {
+            padding: 10px;
+            font-size: 0.95em;
+        }
+
+        .footer-content {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .records-info {
+            justify-content: center;
+            font-size: 0.95em;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin: 8px 0;
+            gap: 4px;
+        }
+
+        .page-size-selector {
+            justify-content: center;
+            font-size: 0.95em;
+        }
+
+        .page-btn {
+            padding: 6px 10px;
+            font-size: 0.95em;
+        }
+    }
+
+    @@media (max-width: 499px) {
+        .data-table {
+            font-size: 0.9em;
+        }
+
+        .data-cell, .header-cell {
+            padding: 8px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-cell {
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            gap: 4px;
+        }
+
+        .action-btn {
+            padding: 4px;
+            font-size: 1em;
+        }
+
+        .footer-content {
+            padding: 8px;
+            gap: 8px;
+        }
+
+        .records-info {
+            font-size: 0.9em;
+            gap: 4px;
+        }
+
+        .pagination {
+            gap: 2px;
+            margin: 8px 0;
+        }
+
+        .page-btn {
+            padding: 4px 8px;
+            font-size: 0.9em;
+            min-width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-size-selector {
+            font-size: 0.9em;
+            gap: 4px;
+        }
+
+        .page-size-select {
+            padding: 2px 4px;
+            font-size: 0.9em;
+        }
+
+        .table-wrapper {
+            margin: 0 -8px;
+            padding: 0 8px;
+            width: calc(100% + 16px);
+        }
+
+        .data-table {
+            min-width: 100%;
+        }
+
+        .actions-cell {
+            position: sticky;
+            right: 0;
+            background: #fff;
+            z-index: 1;
+            min-width: 80px;
+        }
+
+        .header-cell.actions-cell {
+            position: sticky;
+            right: 0;
+            background: #f8f9fa;
+            z-index: 2;
+        }
+    }
+
+    @@media (max-width: 336px) {
+        .data-cell, .header-cell {
+            padding: 6px;
+            font-size: 0.85em;
+        }
+
+        .action-btn {
+            padding: 3px;
+            font-size: 0.95em;
+        }
+
+        .page-btn {
+            padding: 3px 6px;
+            font-size: 0.85em;
+            min-width: 24px;
+            height: 24px;
+        }
+
+        .page-size-select {
+            padding: 2px;
+            font-size: 0.85em;
+        }
+
+        .footer-content {
+            padding: 6px;
+        }
+
+        .records-info {
+            font-size: 0.85em;
+        }
+    }
+</style>
+

@@ -19,6 +19,330 @@
     top: 0;
     background: #f8f9fa;
     z-index: 1;
+}
+
+.grid-row {
+    display: table-row;
+    background: #fff;
+}
+
+.header-row {
+    display: table-row;
+    background: #f8f9fa;
+}
+
+.grid-cell {
+    display: table-cell;
+    padding: 12px;
+    background: #fff;
+    vertical-align: middle;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.header-cell {
+    display: table-cell;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    font-weight: 600;
+    color: #495057;
+}
+
+    .header-cell:hover {
+        background: #e9ecef;
+    }
+
+    .header-cell.active {
+        background: #e7f1ff;
+        border-bottom-color: #007bff;
+    }
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.header-text {
+    font-weight: 600;
+    color: #495057;
+}
+
+.sort-indicator {
+    display: flex;
+    align-items: center;
+    color: #adb5bd;
+    font-size: 0.8em;
+    transition: all 0.2s ease;
+    opacity: 0.5;
+}
+
+.header-cell:hover .sort-indicator {
+    opacity: 1;
+}
+
+.header-cell.active .sort-indicator {
+    color: #007bff;
+    opacity: 1;
+}
+
+.sort-indicator i {
+    transition: transform 0.2s ease;
+}
+
+.header-cell.active .sort-indicator i {
+    transform: scale(1.2);
+}
+
+.actions-cell {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    z-index: 1;
+    min-width: 100px;
+    text-align: center;
+}
+
+.header-cell.actions-cell {
+    position: sticky;
+    right: 0;
+    background: #f8f9fa;
+    z-index: 2;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.edit-btn {
+    color: #28a745;
+}
+
+.delete-btn {
+    color: #dc3545;
+}
+
+.action-btn:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.grid-footer {
+    padding: 16px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+}
+
+.footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.records-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.separator {
+    color: #6c757d;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-btn {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .page-btn:hover {
+        background: #e9ecef;
+    }
+
+    .page-btn.active {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+
+.page-ellipsis {
+    color: #6c757d;
+}
+
+.page-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.page-size-select {
+    padding: 4px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.no-records {
+    display: table-cell;
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .grid-cell, .header-cell {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .records-info {
+        justify-content: center;
+    }
+
+    .pagination {
+        justify-content: center;
+        margin: 8px 0;
+    }
+
+    .page-size-selector {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-cell, .header-cell {
+        padding: 6px;
+        font-size: 0.85em;
+    }
+
+    .action-buttons {
+        gap: 4px;
+    }
+
+    .action-btn {
+        padding: 2px;
+        transform: scale(0.9);
+    }
+
+    .page-btn {
+        padding: 4px 8px;
+        font-size: 0.85em;
+    }
+
+    .page-size-select {
+        padding: 2px 4px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 336px) {
+    .grid-cell, .header-cell {
+        padding: 4px 6px;
+        font-size: 0.8em;
+    }
+
+    .action-btn {
+        transform: scale(0.8);
+    }
+
+    .footer-content {
+        padding: 6px;
+        gap: 8px;
+    }
+
+    .records-info {
+        font-size: 0.8em;
+        gap: 4px;
+    }
+
+    .pagination {
+        gap: 2px;
+    }
+
+    .page-btn {
+        padding: 3px 6px;
+        font-size: 0.8em;
+    }
+
+    .page-size-selector {
+        font-size: 0.8em;
+        gap: 4px;
+    }
+
+    .page-size-select {
+        padding: 2px;
+        font-size: 0.8em;
+    }
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.grid-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+.grid-header {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 1;
     min-width: 100%;
 }
 
@@ -330,8 +654,7 @@
 
     .actions-cell {
         position: static;
-        justify-content: flex-start;
-        padding-left: 140px;
+        place-items: center;
     }
 
         .actions-cell::before {
@@ -386,15 +709,15 @@
             font-size: 0.85em;
         }
 
-    .actions-cell {
+    /*  .actions-cell {
         padding-left: 120px;
-    }
+    }*/
 
-        .actions-cell::before {
-            min-width: 100px;
-            font-size: 0.85em;
-            left: 8px;
-        }
+    .actions-cell::before {
+        min-width: 100px;
+        font-size: 0.85em;
+        left: 8px;
+    }
 
     .action-buttons {
         gap: 2px;
